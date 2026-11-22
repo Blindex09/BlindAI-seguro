@@ -3,11 +3,16 @@
 Assistente de voz para pessoas cegas, no Windows. É um app Electron com um backend Python (FastAPI) e vários servidores
 MCP. Os mesmos servidores servem o app e o Claude (Desktop/Code).
 
+> **Esta é a versão `BlindAI-seguro`.** Ela é o Blind AI com um gateway remoto separado, só de leitura e com login de
+> verdade, feito para a revisão do conector remoto. O Blind local não mudou. O que o gateway faz e o que falta está em
+> [REMOTO.md](REMOTO.md).
+
 ## Documentação
 
 | Arquivo | Assunto |
 |---|---|
 | [ARQUITETURA.md](ARQUITETURA.md) | Visão geral, servidores MCP, como rodar e testar |
+| [REMOTO.md](REMOTO.md) | Gateway remoto só de leitura: ferramentas oferecidas, login, como ligar |
 | [ELECTRON.md](ELECTRON.md) | Processo principal do Electron, supervisor, API, IPC |
 | [CLAUDE.md](CLAUDE.md) | Instruções para o Claude trabalhar neste projeto |
 | [GOOGLE.md](GOOGLE.md) | Integração com o Google |
@@ -65,6 +70,12 @@ O backend escuta somente em `127.0.0.1`.
 | `BLIND_DOCS_DIR` | | Pasta de trabalho do redator de documentos |
 | `BLIND_DOWNLOAD_DIR` | `~/Downloads/Blind` | Pasta de downloads |
 | `BLIND_REMOTE_PORT` | `8770` | Porta do gateway remoto |
+| `BLIND_REMOTE_PUBLIC_URL` | | Endereço https do túnel (obrigatório para o gateway remoto subir) |
+| `BLIND_REMOTE_GITHUB_CLIENT_ID` / `BLIND_REMOTE_GITHUB_CLIENT_SECRET` | | OAuth App do GitHub usado no login do gateway remoto |
+| `BLIND_REMOTE_GITHUB_USER` | | Única conta do GitHub que pode entrar no gateway remoto |
+| `BLIND_REMOTE_STATE_DIR` | `BLIND_DATA_DIR` | Onde fica o estado do login (clientes e renovações, só hash) |
+| `BLIND_REMOTE_HOSTS` | | Hosts extras aceitos pela proteção contra DNS rebinding (o do túnel já entra sozinho) |
+| `BLIND_REMOTE_CONFIG` | `backend/mcp.remote.json` | Servidores que o gateway remoto inicia |
 | `BLIND_WAKE_WORD_ENABLED` | | Liga a palavra de ativação ("blind") |
 | `BLIND_LLM_PROVIDER` / `BLIND_LLM_MODEL` | `auto` | Provedor e modelo de linguagem |
 | `BLIND_TTS_PROVIDER` / `BLIND_TTS_VOICE` | `piper` / `pt_BR-faber-medium` | Voz de saída |

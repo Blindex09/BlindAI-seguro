@@ -7,5 +7,7 @@ minuta_teste.txt
 nota_teste_e2e.txt
 nota_teste_e2e.txt.bak
 data/remote_token.txt
+data/remote_oauth.json
+remote_oauth.json
 *.tmp
 .env

@@ -105,6 +105,23 @@ Modelo padrão `base` (~145 MB, baixado uma vez para `backend/data/models/whispe
 A tela de Configurações mostra o estado e tem o botão "Preparar o reconhecimento de voz" (baixa o modelo antes do primeiro uso).
 As ferramentas do `blind-stt` ficam escondidas do modelo de IA (`modelHiddenTools`): áudio nunca é oferecido a um LLM.
 
+## Gateway remoto (só leitura)
+
+O Claude no celular e na web só aceita conectores remotos. O gateway (`backend/blind_mcp/remote_gateway.py`) é separado do
+Blind local e não expõe o computador. Detalhes, variáveis e passo a passo em [REMOTO.md](REMOTO.md).
+
+| Arquivo | O que faz |
+|---|---|
+| `backend/mcp.remote.json` | Os únicos servidores que o gateway inicia (não lê o `mcp.json`). Cada um recebe `BLIND_DATA_DIR`, porque um servidor filho não herda o ambiente. |
+| `backend/blind_mcp/remote_allowlist.py` | As 9 ferramentas de leitura oferecidas e executadas, os argumentos proibidos (caminho, chave de API, provedor, modelo) e o guia que o `comecar` devolve. |
+| `backend/blind_mcp/remote_oauth.py` | Login OAuth 2.1 com o GitHub para uma conta só: cadastro, PKCE S256, código de uso único, renovação que troca a cada uso, tokens só como hash. |
+| `backend/blind_mcp/remote_fetch.py` | Baixa PDF ou imagem de um link público, recusando endereço interno, inclusive em redirecionamento. |
+| `backend/blind_mcp/remote_image.py` | `describe_image` remoto: entrega a imagem ao próprio Claude, sem chave de IA. |
+
+No gerenciador, `call_raw(..., from_model=True)` respeita `modelHiddenTools`. No Blind local, `read_document`, `describe_image` e
+`ver_imagem` também aceitam `url` de um link público. Testes: `backend/blind_mcp/tests/test_remote_gateway.py` e
+`test_remote_oauth.py`.
+
 ## Como rodar
 
 ```bash
