@@ -23,9 +23,7 @@ REMOTE_READ_ONLY = {
     "blind-memory__memory_recall": "le a memoria que a pessoa pediu para lembrar",
     "blind-memory__session_search": "busca nas conversas do proprio Blind",
     "blind-schedule__blindschedule_list": "lista os lembretes; nao cria nem apaga",
-    "blind-system__acoes_recentes": "lista o que o Blind fez, so leitura",
     "blind-system__saude_teclado": "estado do teclado, so leitura",
-    "blind-system__trabalho_nao_salvo": "avisa se ha trabalho sem salvar, so leitura",
     "blind-system__vigia_status": "estado do vigia, so leitura",
     "blind-speech__list_voices": "lista as vozes instaladas",
 }
