@@ -6,11 +6,10 @@ O app do Claude fora do computador so aceita conectores remotos. Este gateway e 
   comanda o computador, le arquivo por caminho ou abre o cofre);
 - respeita as ferramentas escondidas do modelo ao chamar (`call_raw(..., from_model=True)`);
 - liga a protecao contra DNS rebinding: so aceita o Host de `BLIND_REMOTE_HOSTS` (padrao: localhost e 127.0.0.1).
-O gateway ouve em http://127.0.0.1:PORTA/<segredo>/mcp. O <segredo> e um token aleatorio guardado em
-data/remote_token.txt: quem nao o tem recebe 404. ATENCAO: o segredo na URL ainda NAO e um login de verdade.
-Antes de abrir um tunel, ponha um login com identidade na frente (OAuth ou tunel com identidade), como pediu a revisao.
+Login: OAuth 2.1 com o GitHub, so para a conta de BLIND_REMOTE_GITHUB_USER (remote_oauth.py). O /mcp exige o token
+do Claude; sem ele a resposta e 401. O caminho com segredo na URL deixou de existir.
 
-Uso:  python -m blind_mcp.remote_gateway   (variaveis: BLIND_REMOTE_PORT, padrao 8770)
+Uso:  python -m blind_mcp.remote_gateway   (variaveis: BLIND_REMOTE_PORT, padrao 8770, e as do login em remote_oauth.py)
 """
 
 from __future__ import annotations
@@ -18,9 +17,8 @@ from __future__ import annotations
 import contextlib
 import logging
 import os
-import secrets
 from pathlib import Path
-from typing import Any, List
+from typing import Any, List, Optional
 
 import mcp.types as types
 import uvicorn
@@ -29,11 +27,12 @@ from mcp.server.streamable_http_manager import StreamableHTTPSessionManager
 from mcp.server.transport_security import TransportSecuritySettings
 from starlette.applications import Starlette
 from starlette.responses import PlainTextResponse
-from starlette.routing import Mount
+from starlette.routing import Route
 from starlette.types import Receive, Scope, Send
 
 from .config import config_path, default_data_dir, load_specs
 from .manager import MCPManager
+from .remote_oauth import IdP, OAuthConfig, OAuthServer
 import base64
 from . import remote_fetch, remote_image
 from .remote_allowlist import URL_TOOLS, allowed, clean_schema, forbidden_args, guia, with_forced
@@ -49,28 +48,25 @@ def remote_config_path() -> Path:
     return Path(os.environ.get("BLIND_REMOTE_CONFIG") or (config_path().parent / "mcp.remote.json"))
 
 
-def remote_hosts() -> List[str]:
-    """Hosts aceitos (protecao contra DNS rebinding). Com tunel, ponha o nome dele em BLIND_REMOTE_HOSTS."""
+def _extra_hosts(public_host: str = "") -> List[str]:
     extra = [h.strip() for h in os.environ.get("BLIND_REMOTE_HOSTS", "").split(",") if h.strip()]
-    return [f"127.0.0.1:{PORT}", f"localhost:{PORT}", *extra]
+    return [*extra, *([public_host] if public_host and public_host not in extra else [])]
 
 
-def remote_origins() -> List[str]:
-    return [f"http://127.0.0.1:{PORT}", f"http://localhost:{PORT}", *[f"https://{h}" for h in os.environ.get("BLIND_REMOTE_HOSTS", "").split(",") if h.strip()]]
+def remote_hosts(public_host: str = "") -> List[str]:
+    """Hosts aceitos (protecao contra DNS rebinding): local e o endereco do tunel."""
+    return [f"127.0.0.1:{PORT}", f"localhost:{PORT}", *_extra_hosts(public_host)]
 
 
-def load_token() -> str:
-    path = default_data_dir() / "remote_token.txt"
-    if path.is_file() and path.read_text(encoding="utf-8").strip():
-        return path.read_text(encoding="utf-8").strip()
-    path.parent.mkdir(parents=True, exist_ok=True)
-    token = secrets.token_urlsafe(32)
-    path.write_text(token, encoding="utf-8")
-    return token
+def remote_origins(public_host: str = "") -> List[str]:
+    return [f"http://127.0.0.1:{PORT}", f"http://localhost:{PORT}", *[f"https://{h}" for h in _extra_hosts(public_host)]]
 
 
-def build_app() -> Starlette:
-    manager = MCPManager(specs=load_specs(remote_config_path()))
+def build_app(oauth_config: Optional[OAuthConfig] = None, idp: Optional[IdP] = None, specs: Optional[list] = None):
+    """O app do gateway. Sem as variaveis do login ele nao sobe: nunca ha um /mcp aberto."""
+    cfg = oauth_config or OAuthConfig.from_env(default_data_dir())
+    oauth = OAuthServer(cfg, idp=idp)
+    manager = MCPManager(specs=specs if specs is not None else load_specs(remote_config_path()))
     server: Server = Server("blind")
 
     @server.list_tools()
@@ -119,50 +115,53 @@ def build_app() -> Starlette:
         app=server,
         json_response=True,
         stateless=True,
-        security_settings=TransportSecuritySettings(enable_dns_rebinding_protection=True, allowed_hosts=remote_hosts(), allowed_origins=remote_origins()),
+        security_settings=TransportSecuritySettings(enable_dns_rebinding_protection=True, allowed_hosts=remote_hosts(cfg.host), allowed_origins=remote_origins(cfg.host)),
     )
-    token = load_token()
 
-    async def handle(scope: Scope, receive: Receive, send: Send) -> None:
-        await session_manager.handle_request(scope, receive, send)
-
-    async def not_found(scope: Scope, receive: Receive, send: Send) -> None:
-        await PlainTextResponse("not found", status_code=404)(scope, receive, send)
+    async def mcp_app(scope: Scope, receive: Receive, send: Send) -> None:
+        """O /mcp so com o token do login; sem ele, 401 com o aviso de onde fazer o login."""
+        headers = {k.decode("latin-1").lower(): v.decode("latin-1") for k, v in scope.get("headers", [])}
+        if not oauth.valid_bearer(headers.get("authorization", "")):
+            await PlainTextResponse("login necessario", status_code=401, headers={"WWW-Authenticate": oauth.www_authenticate("invalid_token" if headers.get("authorization") else "")})(scope, receive, send)
+            return
+        await session_manager.handle_request(dict(scope, path="/mcp", raw_path=b"/mcp"), receive, send)
 
     @contextlib.asynccontextmanager
     async def lifespan(_app: Starlette):
         await manager.start(wait=True)
         async with session_manager.run():
-            logger.info("Gateway remoto pronto em /%s/mcp", "<segredo>")
+            logger.info("Gateway remoto pronto em %s/mcp (login: GitHub %s)", cfg.base_url, cfg.github_user)
             yield
         await manager.stop()
 
-    class Router:
-        """Aceita so /<segredo>/mcp; qualquer outro caminho (ou segredo errado) vira 404 sem pista."""
+    web = Starlette(
+        lifespan=lifespan,
+        routes=[
+            Route("/.well-known/oauth-protected-resource", oauth.protected_resource),
+            Route("/.well-known/oauth-protected-resource/mcp", oauth.protected_resource),
+            Route("/.well-known/oauth-authorization-server", oauth.metadata),
+            Route("/oauth/register", oauth.register, methods=["POST"]),
+            Route("/oauth/authorize", oauth.authorize),
+            Route("/oauth/github/callback", oauth.github_callback),
+            Route("/oauth/token", oauth.token, methods=["POST"]),
+        ],
+    )
 
-        def __init__(self) -> None:
-            self.prefix = f"/{token}"
+    async def app(scope: Scope, receive: Receive, send: Send) -> None:
+        if scope["type"] == "http" and scope.get("path", "") in ("/mcp", "/mcp/"):
+            await mcp_app(scope, receive, send)
+        else:
+            await web(scope, receive, send)
 
-        async def __call__(self, scope: Scope, receive: Receive, send: Send) -> None:
-            if scope["type"] == "lifespan":
-                await app(scope, receive, send)
-                return
-            path = scope.get("path", "")
-            if scope["type"] == "http" and (path == f"{self.prefix}/mcp" or path == f"{self.prefix}/mcp/"):
-                inner = dict(scope, path="/mcp", raw_path=b"/mcp")
-                await handle(inner, receive, send)
-            else:
-                await not_found(scope, receive, send)
-
-    app = Starlette(lifespan=lifespan, routes=[Mount("/__none__", app=not_found)])
-    return Router()  # type: ignore[return-value]
+    app.oauth = oauth  # type: ignore[attr-defined]  # os testes leem o estado do login
+    return app
 
 
 def main() -> None:
     logging.basicConfig(level=logging.INFO)
-    token = load_token()
-    print(f"Gateway Blind AI em http://127.0.0.1:{PORT}/{token}/mcp  (token em {default_data_dir() / 'remote_token.txt'})")
-    uvicorn.run(build_app(), host="127.0.0.1", port=PORT, log_level="info")
+    app = build_app()
+    print(f"Gateway Blind AI em http://127.0.0.1:{PORT}  (endereco publico: {app.oauth.cfg.base_url}/mcp)")
+    uvicorn.run(app, host="127.0.0.1", port=PORT, log_level="info")
 
 
 if __name__ == "__main__":

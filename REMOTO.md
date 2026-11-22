@@ -14,17 +14,39 @@ Esta versão do Blind AI existe para a revisão do conector remoto. O Blind loca
 - Respeita as ferramentas escondidas do modelo ao chamar (`call_raw(..., from_model=True)`).
 - Liga a proteção contra DNS rebinding. Só aceita o Host de `BLIND_REMOTE_HOSTS` (padrão `127.0.0.1` e `localhost`).
 
-## O que ainda falta
+## Login
 
-- **Login de verdade.** O caminho da URL ainda tem um segredo, e isso não é login. Antes de abrir qualquer túnel, falta pôr OAuth ou um túnel com identidade na frente.
-- Se uma ferramenta que envia ou apaga entrar um dia na lista, a confirmação precisa vir da pessoa, por voz ou teclado, e não do modelo. Hoje nenhuma entra.
+O gateway usa OAuth 2.1 com o GitHub, só para uma conta (`BLIND_REMOTE_GITHUB_USER`). O Claude faz o login uma vez e depois manda um token em cada chamada.
 
-## Como rodar
+- `/mcp` sem token responde 401. O caminho com segredo na URL deixou de existir.
+- O cadastro do Claude só aceita o retorno do próprio Claude (`claude.ai` e `claude.com`) ou um endereço local.
+- Outra conta do GitHub vê 403 e não recebe código.
+- O código de autorização vale uma vez e cinco minutos. O token de acesso vale uma hora, e o refresh troca a cada uso.
+- Os tokens ficam em disco só como hash. O gateway não sobe sem as variáveis abaixo.
+
+Se uma ferramenta que envia ou apaga entrar um dia na lista, a confirmação precisa vir da pessoa, por voz ou teclado, e não do modelo. Hoje nenhuma entra.
+
+## Como ligar
+
+1. **GitHub.** Em Settings, Developer settings, OAuth Apps, crie um app novo. Em "Authorization callback URL" ponha `<endereco publico>/oauth/github/callback`. Guarde o Client ID e gere um Client Secret.
+2. **Túnel.** Exponha a porta 8770 (por exemplo `cloudflared tunnel` ou `ngrok http 8770`) e anote o endereço `https://...`. O endereço precisa ser fixo, porque o Claude guarda o conector com ele.
+3. **Variáveis.** Ponha num arquivo local fora do repositório, nunca no git:
+
+```powershell
+$env:BLIND_REMOTE_PUBLIC_URL = "https://blind.exemplo.net"
+$env:BLIND_REMOTE_GITHUB_CLIENT_ID = "..."
+$env:BLIND_REMOTE_GITHUB_CLIENT_SECRET = "..."
+$env:BLIND_REMOTE_GITHUB_USER = "Blindex09"
+```
+
+4. **Subir.**
 
 ```powershell
 cd backend
 $env:PYTHONPATH = "."
 python -m blind_mcp.remote_gateway
 ```
+
+5. **Claude.** Em Configurações, Conectores, adicione um conector personalizado com a URL `https://blind.exemplo.net/mcp`. O Claude abre o login do GitHub. Entre com a conta liberada.
 
 Para incluir uma ferramenta, ela passa nas três perguntas de `remote_allowlist.py` e entra na lista numa revisão. Os testes estão em `backend/blind_mcp/tests/test_remote_gateway.py`.
