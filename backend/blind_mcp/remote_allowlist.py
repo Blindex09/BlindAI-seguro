@@ -23,10 +23,28 @@ REMOTE_READ_ONLY = {
     "blind-memory__memory_recall": "le a memoria que a pessoa pediu para lembrar",
     "blind-memory__session_search": "busca nas conversas do proprio Blind",
     "blind-schedule__blindschedule_list": "lista os lembretes; nao cria nem apaga",
-    "blind-system__saude_teclado": "estado do teclado, so leitura",
-    "blind-system__vigia_status": "estado do vigia, so leitura",
     "blind-speech__list_voices": "lista as vozes instaladas",
+    "blind-docs__read_document": "le o texto de um documento que a pessoa manda em base64 (nunca por caminho)",
+    "blind-docs__describe_image": "descreve uma imagem que a pessoa manda em base64 (nunca por caminho)",
 }
+
+# argumentos que o gateway remoto nunca aceita, nem lista no esquema: um caminho de arquivo leria o computador
+REMOTE_FORBIDDEN_ARGS = frozenset({"file_path", "path", "caminho", "output_path", "save_path", "api_key", "provider", "model"})
+
+
+def forbidden_args(arguments) -> list:
+    """Os argumentos proibidos que uma chamada trouxe (lista vazia: pode seguir)."""
+    return sorted(k for k in (arguments or {}) if k in REMOTE_FORBIDDEN_ARGS)
+
+
+def clean_schema(schema: dict) -> dict:
+    """O esquema da ferramenta sem os argumentos proibidos, para o Claude nem ver que existem."""
+    out = dict(schema or {})
+    props = {k: v for k, v in (out.get("properties") or {}).items() if k not in REMOTE_FORBIDDEN_ARGS}
+    out["properties"] = props
+    if out.get("required"):
+        out["required"] = [r for r in out["required"] if r not in REMOTE_FORBIDDEN_ARGS]
+    return out
 
 
 def allowed(qualified: str) -> bool:

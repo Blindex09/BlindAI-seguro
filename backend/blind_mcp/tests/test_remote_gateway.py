@@ -16,7 +16,7 @@ FAKE = str(Path(__file__).with_name("fake_server.py"))
 # ferramentas que apagam, enviam, gravam, comandam o computador, leem arquivo por caminho ou abrem o cofre
 PERIGO = ("send", "enviar", "enviar_arquivo", "delete", "apagar", "remove", "forget", "save", "salvar", "write", "fill",
           "cofre", "secret", "segredo", "powershell", "click", "type_text", "press_keys", "file", "move", "kill",
-          "process", "registry", "clipboard", "read_document", "responder", "baixar", "download", "pair", "connect",
+          "process", "registry", "clipboard", "responder", "baixar", "download", "pair", "connect",
           "snooze", "create", "gmail", "drive")
 
 
@@ -74,3 +74,14 @@ def test_call_raw_respects_hidden_tools_when_the_caller_is_the_model(tmp_path):
             await mgr.stop()
 
     assert asyncio.run(go()) is not None
+
+
+def test_files_are_read_from_content_never_from_a_path_on_the_pc():
+    from blind_mcp.remote_allowlist import clean_schema, forbidden_args
+
+    assert forbidden_args({"file_path": "C:/Users/x/segredo.pdf"}) == ["file_path"]
+    assert forbidden_args({"file_base64": "AAAA"}) == []
+    limpo = clean_schema({"type": "object", "properties": {"file_path": {}, "file_base64": {}}, "required": ["file_path"]})
+    assert "file_path" not in limpo["properties"] and "file_base64" in limpo["properties"] and limpo["required"] == []
+    assert allowed("blind-docs__read_document") and allowed("blind-docs__describe_image")
+    assert not allowed("blind-docs__ver_imagem") and not allowed("blind-docs__document_outline")  # so aceitam caminho

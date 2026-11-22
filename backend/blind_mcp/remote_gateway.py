@@ -34,7 +34,7 @@ from starlette.types import Receive, Scope, Send
 
 from .config import config_path, default_data_dir, load_specs
 from .manager import MCPManager
-from .remote_allowlist import allowed, guia
+from .remote_allowlist import allowed, clean_schema, forbidden_args, guia
 
 logger = logging.getLogger("blind.remote")
 PORT = int(os.environ.get("BLIND_REMOTE_PORT", "8770"))
@@ -82,7 +82,7 @@ def build_app() -> Starlette:
         for ref in manager.list_tools():
             if ref.hidden_from_model or not allowed(ref.qualified):
                 continue
-            tools.append(types.Tool(name=ref.qualified, description=ref.description[:1000], inputSchema=ref.schema))
+            tools.append(types.Tool(name=ref.qualified, description=ref.description[:1000], inputSchema=clean_schema(ref.schema)))
         return tools
 
     @server.call_tool()
@@ -91,6 +91,9 @@ def build_app() -> Starlette:
             return [types.TextContent(type="text", text=guia())]
         if not allowed(name):  # a lista vale para chamar, nao so para listar
             raise RuntimeError(f"Ferramenta indisponivel pelo gateway remoto: {name}")
+        proibidos = forbidden_args(arguments)
+        if proibidos:  # um caminho de arquivo leria o computador: so o conteudo em base64 vale aqui
+            raise RuntimeError(f"Este conector nao aceita estes argumentos: {', '.join(proibidos)}. Arquivos so por conteudo em base64.")
         result = await manager.call_raw(name, arguments, from_model=True)
         if result.isError:  # o decorador transforma excecao em isError
             raise RuntimeError("\n".join(getattr(b, "text", "") for b in result.content) or "falha na ferramenta")
