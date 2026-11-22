@@ -9,7 +9,8 @@
       ],
       "cwd": "${BACKEND_DIR}",
       "env": {
-        "PYTHONUTF8": "1"
+        "PYTHONUTF8": "1",
+        "BLIND_DATA_DIR": "${DATA_DIR}"
       },
       "callTimeout": 120,
       "lazy": true
@@ -23,7 +24,8 @@
       ],
       "cwd": "${BACKEND_DIR}",
       "env": {
-        "PYTHONUTF8": "1"
+        "PYTHONUTF8": "1",
+        "BLIND_DATA_DIR": "${DATA_DIR}"
       },
       "lazy": true
     },
@@ -36,7 +38,8 @@
       ],
       "cwd": "${BACKEND_DIR}",
       "env": {
-        "PYTHONUTF8": "1"
+        "PYTHONUTF8": "1",
+        "BLIND_DATA_DIR": "${DATA_DIR}"
       }
     },
     "blind-schedule": {
@@ -48,7 +51,8 @@
       ],
       "cwd": "${BACKEND_DIR}",
       "env": {
-        "PYTHONUTF8": "1"
+        "PYTHONUTF8": "1",
+        "BLIND_DATA_DIR": "${DATA_DIR}"
       }
     }
   }

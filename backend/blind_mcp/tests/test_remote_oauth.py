@@ -155,3 +155,14 @@ def test_tokens_are_stored_only_as_hashes(tmp_path):
         tk = token(c, cid, code).json()
     disco = (tmp_path / "oauth.json").read_text(encoding="utf-8")
     assert tk["refresh_token"] not in disco and tk["access_token"] not in disco
+
+
+def test_login_state_can_live_outside_the_blind_data_folder(monkeypatch, tmp_path):
+    for k, v in (("BLIND_REMOTE_PUBLIC_URL", "https://blind.exemplo.net"), ("BLIND_REMOTE_GITHUB_CLIENT_ID", "a"),
+                 ("BLIND_REMOTE_GITHUB_CLIENT_SECRET", "b"), ("BLIND_REMOTE_GITHUB_USER", "c")):
+        monkeypatch.setenv(k, v)
+    dados, estado = tmp_path / "dados", tmp_path / "estado"
+    monkeypatch.delenv("BLIND_REMOTE_STATE_DIR", raising=False)
+    assert OAuthConfig.from_env(dados).state_path == dados / "remote_oauth.json"
+    monkeypatch.setenv("BLIND_REMOTE_STATE_DIR", str(estado))
+    assert OAuthConfig.from_env(dados).state_path == estado / "remote_oauth.json"

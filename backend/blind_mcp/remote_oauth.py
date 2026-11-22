@@ -77,8 +77,10 @@ class OAuthConfig:
         base = env["BLIND_REMOTE_PUBLIC_URL"].strip().rstrip("/")
         if not base.startswith("https://") and not base.startswith("http://127.0.0.1") and not base.startswith("http://localhost"):
             raise RuntimeError("BLIND_REMOTE_PUBLIC_URL precisa ser https:// (o endereco do tunel).")
+        # o estado do login (clientes e tokens de renovacao, so hash) pode morar fora da pasta de dados do Blind
+        state_dir = Path(env.get("BLIND_REMOTE_STATE_DIR", "").strip() or data_dir)
         return cls(base, env["BLIND_REMOTE_GITHUB_CLIENT_ID"].strip(), env["BLIND_REMOTE_GITHUB_CLIENT_SECRET"].strip(),
-                   env["BLIND_REMOTE_GITHUB_USER"].strip(), data_dir / "remote_oauth.json")
+                   env["BLIND_REMOTE_GITHUB_USER"].strip(), state_dir / "remote_oauth.json")
 
 
 def redirect_ok(uri: str) -> bool:

@@ -175,3 +175,18 @@ def test_local_document_tools_take_a_public_url_and_refuse_internal_ones():
                 await docs.ver_imagem(url=ruim)
 
     asyncio.run(go())
+
+
+def test_every_remote_server_gets_the_data_folder_explicitly():
+    """Um servidor filho nao herda o ambiente do gateway: sem BLIND_DATA_DIR no env dele, a memoria real nao e lida."""
+    servers = json.loads((BACKEND / "mcp.remote.json").read_text(encoding="utf-8"))["mcpServers"]
+    for nome, spec in servers.items():
+        assert spec.get("env", {}).get("BLIND_DATA_DIR") == "${DATA_DIR}", nome
+
+
+def test_the_data_folder_reaches_the_child_server_through_the_remote_config(monkeypatch, tmp_path):
+    from blind_mcp.config import load_specs
+
+    monkeypatch.setenv("BLIND_DATA_DIR", str(tmp_path))
+    specs = {s.name: s for s in load_specs(BACKEND / "mcp.remote.json")}
+    assert specs["blind-memory"].env["BLIND_DATA_DIR"] == str(tmp_path)

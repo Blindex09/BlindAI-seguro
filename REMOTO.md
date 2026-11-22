@@ -37,6 +37,9 @@ $env:BLIND_REMOTE_PUBLIC_URL = "https://blind.exemplo.net"
 $env:BLIND_REMOTE_GITHUB_CLIENT_ID = "..."
 $env:BLIND_REMOTE_GITHUB_CLIENT_SECRET = "..."
 $env:BLIND_REMOTE_GITHUB_USER = "Blindex09"
+# opcional: a pasta de dados do Blind (memoria) e onde guardar o estado do login
+$env:BLIND_DATA_DIR = "C:\caminho\dolindackend\data"
+$env:BLIND_REMOTE_STATE_DIR = "C:\caminhoora\doepositorio"
 ```
 
 4. **Subir.**
