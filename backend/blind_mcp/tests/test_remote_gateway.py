@@ -85,3 +85,36 @@ def test_files_are_read_from_content_never_from_a_path_on_the_pc():
     assert "file_path" not in limpo["properties"] and "file_base64" in limpo["properties"] and limpo["required"] == []
     assert allowed("blind-docs__read_document") and allowed("blind-docs__describe_image")
     assert not allowed("blind-docs__ver_imagem") and not allowed("blind-docs__document_outline")  # so aceitam caminho
+
+
+def test_describe_image_hands_the_image_to_claude_and_needs_no_ai_key():
+    import base64
+    import io
+
+    from PIL import Image
+
+    from blind_mcp import remote_image
+
+    buf = io.BytesIO()
+    Image.new("RGB", (40, 30), (200, 10, 10)).save(buf, format="PNG")
+    out = remote_image.entregar(base64.b64encode(buf.getvalue()).decode(), "que cor e?")
+    assert [b.type for b in out] == ["text", "image"]
+    assert "que cor e?" in out[0].text and out[1].mimeType == "image/jpeg"
+    assert set(remote_image.SCHEMA["properties"]) == {"image_base64", "prompt"}  # sem file_path, api_key, provider, model
+    with pytest.raises(ValueError):
+        remote_image.entregar("isto nao e uma imagem")
+
+
+def test_scanned_pdf_never_uses_the_owners_ai_key():
+    from blind_mcp.remote_allowlist import clean_schema, with_forced
+
+    assert with_forced("blind-docs__read_document", {"file_base64": "AA", "ocr_scanned": True})["ocr_scanned"] is False
+    sch = clean_schema({"type": "object", "properties": {"file_base64": {}, "ocr_scanned": {}}}, "blind-docs__read_document")
+    assert "ocr_scanned" not in sch["properties"]
+
+
+def test_system_tools_are_only_the_two_that_show_no_content_of_the_pc():
+    sistema = {n for n in REMOTE_READ_ONLY if n.startswith("blind-system__")}
+    assert sistema == {"blind-system__saude_teclado", "blind-system__vigia_status"}
+    assert not allowed("blind-system__acoes_recentes") and not allowed("blind-system__trabalho_nao_salvo")
+    assert not allowed("blind-system__vigia_configurar")

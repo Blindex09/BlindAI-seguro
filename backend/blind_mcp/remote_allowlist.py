@@ -25,8 +25,13 @@ REMOTE_READ_ONLY = {
     "blind-schedule__blindschedule_list": "lista os lembretes; nao cria nem apaga",
     "blind-speech__list_voices": "lista as vozes instaladas",
     "blind-docs__read_document": "le o texto de um documento que a pessoa manda em base64 (nunca por caminho)",
-    "blind-docs__describe_image": "descreve uma imagem que a pessoa manda em base64 (nunca por caminho)",
+    "blind-docs__describe_image": "entrega uma imagem em base64 ao Claude para ele descrever; sem chave de IA, nunca por caminho",
+    "blind-system__saude_teclado": "estado do teclado e do mouse; so leitura, sem conteudo do computador",
+    "blind-system__vigia_status": "estado do vigia (ligado ou nao); so leitura, sem conteudo do computador",
 }
+
+# argumentos que o gateway fixa e o Claude nao escolhe: o OCR de PDF escaneado usaria a chave de IA do dono
+REMOTE_FORCED_ARGS = {"blind-docs__read_document": {"ocr_scanned": False}}
 
 # argumentos que o gateway remoto nunca aceita, nem lista no esquema: um caminho de arquivo leria o computador
 REMOTE_FORBIDDEN_ARGS = frozenset({"file_path", "path", "caminho", "output_path", "save_path", "api_key", "provider", "model"})
@@ -37,13 +42,19 @@ def forbidden_args(arguments) -> list:
     return sorted(k for k in (arguments or {}) if k in REMOTE_FORBIDDEN_ARGS)
 
 
-def clean_schema(schema: dict) -> dict:
-    """O esquema da ferramenta sem os argumentos proibidos, para o Claude nem ver que existem."""
+def with_forced(qualified: str, arguments) -> dict:
+    """Os argumentos da chamada com os fixos do gateway por cima."""
+    return {**(arguments or {}), **REMOTE_FORCED_ARGS.get(qualified, {})}
+
+
+def clean_schema(schema: dict, qualified: str = "") -> dict:
+    """O esquema da ferramenta sem os argumentos proibidos nem os fixos, para o Claude nem ver que existem."""
+    hidden = REMOTE_FORBIDDEN_ARGS | set(REMOTE_FORCED_ARGS.get(qualified, {}))
     out = dict(schema or {})
-    props = {k: v for k, v in (out.get("properties") or {}).items() if k not in REMOTE_FORBIDDEN_ARGS}
+    props = {k: v for k, v in (out.get("properties") or {}).items() if k not in hidden}
     out["properties"] = props
     if out.get("required"):
-        out["required"] = [r for r in out["required"] if r not in REMOTE_FORBIDDEN_ARGS]
+        out["required"] = [r for r in out["required"] if r not in hidden]
     return out
 
 
@@ -59,6 +70,7 @@ def guia() -> str:
         "Blind AI, conector remoto (so leitura).",
         "Este conector nao apaga, envia nem grava nada, e nao mexe no computador. "
         "Se a pessoa pedir algo assim, diga que isso se faz no Blind do computador, por voz.",
+        "Imagens e PDFs entram so por conteudo em base64. PDF escaneado nao passa por OCR aqui: mande as paginas como imagem em describe_image.",
         "Ferramentas deste conector:",
         linhas,
     ])

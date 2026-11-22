@@ -34,7 +34,9 @@ from starlette.types import Receive, Scope, Send
 
 from .config import config_path, default_data_dir, load_specs
 from .manager import MCPManager
-from .remote_allowlist import allowed, clean_schema, forbidden_args, guia
+from . import remote_image
+from .remote_allowlist import allowed, clean_schema, forbidden_args, guia, with_forced
+DESCRIBE = "blind-docs__describe_image"
 
 logger = logging.getLogger("blind.remote")
 PORT = int(os.environ.get("BLIND_REMOTE_PORT", "8770"))
@@ -82,7 +84,10 @@ def build_app() -> Starlette:
         for ref in manager.list_tools():
             if ref.hidden_from_model or not allowed(ref.qualified):
                 continue
-            tools.append(types.Tool(name=ref.qualified, description=ref.description[:1000], inputSchema=clean_schema(ref.schema)))
+            if ref.qualified == DESCRIBE:  # o gateway mesmo entrega a imagem ao Claude, sem chave de IA
+                tools.append(types.Tool(name=DESCRIBE, description=remote_image.DESCRICAO, inputSchema=remote_image.SCHEMA))
+                continue
+            tools.append(types.Tool(name=ref.qualified, description=ref.description[:1000], inputSchema=clean_schema(ref.schema, ref.qualified)))
         return tools
 
     @server.call_tool()
@@ -94,7 +99,9 @@ def build_app() -> Starlette:
         proibidos = forbidden_args(arguments)
         if proibidos:  # um caminho de arquivo leria o computador: so o conteudo em base64 vale aqui
             raise RuntimeError(f"Este conector nao aceita estes argumentos: {', '.join(proibidos)}. Arquivos so por conteudo em base64.")
-        result = await manager.call_raw(name, arguments, from_model=True)
+        if name == DESCRIBE:
+            return remote_image.entregar(str((arguments or {}).get("image_base64") or ""), (arguments or {}).get("prompt"))
+        result = await manager.call_raw(name, with_forced(name, arguments), from_model=True)
         if result.isError:  # o decorador transforma excecao em isError
             raise RuntimeError("\n".join(getattr(b, "text", "") for b in result.content) or "falha na ferramenta")
         return list(result.content)

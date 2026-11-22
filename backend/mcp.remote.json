@@ -50,6 +50,18 @@
       "env": {
         "PYTHONUTF8": "1"
       }
+    },
+    "blind-system": {
+      "description": "Diagnostico somente leitura: diario de acoes do Blind, saude do teclado e deteccao de trabalho nao salvo. Nao aperta teclas nem muda nada.",
+      "command": "${PYTHON}",
+      "args": [
+        "-m",
+        "blind_mcp.servers.system"
+      ],
+      "cwd": "${BACKEND_DIR}",
+      "env": {
+        "PYTHONUTF8": "1"
+      }
     }
   }
 }
