@@ -154,3 +154,24 @@ def test_document_tools_take_a_public_url_and_never_a_path():
 
     sch = clean_schema({"type": "object", "properties": {"file_path": {}, "file_base64": {}}}, "blind-docs__read_document")
     assert "url" in sch["properties"] and "file_path" not in sch["properties"]
+
+
+def test_guia_carries_the_blind_rules_for_a_blind_listener_without_local_only_tools():
+    texto = guia()
+    for regra in ("Jeito de falar", "Descrevendo imagens", "Lendo documentos", "Nunca identifique alguem pelo rosto".replace("alguem", "alguém")):
+        assert regra in texto
+    for fora in ("ver_imagem", "document_outline", "falar_em_segredo", "documento_acessibilidade"):
+        assert fora not in texto
+
+
+def test_local_document_tools_take_a_public_url_and_refuse_internal_ones():
+    from blind_mcp.servers import docs
+
+    async def go():
+        for ruim in ("http://127.0.0.1/x.pdf", "http://169.254.169.254/x", "file:///C:/Windows/win.ini"):
+            with pytest.raises(ValueError):
+                await docs.read_document(url=ruim)
+            with pytest.raises(ValueError):
+                await docs.ver_imagem(url=ruim)
+
+    asyncio.run(go())

@@ -10,6 +10,8 @@ numa revisao. O gateway recusa qualquer nome que nao esteja nesta lista, mesmo q
 
 from __future__ import annotations
 
+from pathlib import Path
+
 PERGUNTAS = (
     "Ela apaga ou troca algo no computador ou na conta da pessoa?",
     "Ela envia algo a alguem (mensagem, e-mail, arquivo, fala)?",
@@ -66,15 +68,43 @@ def allowed(qualified: str) -> bool:
     return qualified in REMOTE_READ_ONLY
 
 
+HABILIDADES = Path(__file__).resolve().parent / "habilidades"
+# so as habilidades que valem sem as ferramentas locais; linhas que citam ferramentas que o remoto nao oferece saem
+_FORA = ("ver_imagem", "document_outline", "channel_describe_image", "documento_acessibilidade", "falar_em_segredo", "continuar")
+
+
+def _habilidade(nome: str, secao: str = "") -> str:
+    """O texto de uma habilidade do Blind, sem o cabecalho e sem as linhas que citam ferramentas que o remoto nao tem."""
+    arq = HABILIDADES / f"{nome}.md"
+    if not arq.is_file():
+        return ""
+    texto = arq.read_text(encoding="utf-8")
+    if texto.startswith("---"):
+        texto = texto.split("---", 2)[2]
+    if secao:
+        achou = texto.split(f"## {secao}", 1)
+        if len(achou) < 2:
+            return ""
+        texto = achou[1].split(chr(10) + "## ", 1)[0]
+    return chr(10).join(l for l in texto.strip().splitlines() if not any(f in l for f in _FORA))
+
+
 def guia() -> str:
-    """O que `comecar` responde no gateway remoto: so as ferramentas desta lista, nada do Blind local."""
+    """O que `comecar` responde no gateway remoto: as ferramentas desta lista e o jeito de falar do Blind para pessoa cega."""
     nl = chr(10)
     linhas = nl.join(f"- {nome}: {motivo}" for nome, motivo in sorted(REMOTE_READ_ONLY.items()))
-    return nl.join([
+    partes = [
         "Blind AI, conector remoto (so leitura).",
         "Este conector nao apaga, envia nem grava nada, e nao mexe no computador. "
         "Se a pessoa pedir algo assim, diga que isso se faz no Blind do computador, por voz.",
-        "Imagens e PDFs entram por conteudo em base64 ou por link publico da web (url). Nunca por caminho do computador. PDF escaneado nao passa por OCR aqui: mande as paginas como imagem em describe_image.",
+        "Imagens e PDFs entram por conteudo em base64 ou por link publico da web (url). Nunca por caminho do computador. "
+        "PDF escaneado nao passa por OCR aqui: mande as paginas como imagem em describe_image. "
+        "Um arquivo anexado na conversa voce mesmo ja le: nao precisa de ferramenta.",
+        "OBRIGATORIO: a pessoa pode ser cega e ouve a resposta. Siga estas regras de fala, de descricao de imagens e de leitura de documentos.",
+        "## Jeito de falar" + nl + _habilidade("jeito-de-falar"),
+        "## Descrevendo imagens" + nl + _habilidade("descrevendo-imagens"),
+        "## Lendo documentos" + nl + _habilidade("lendo-documentos", "Ler"),
         "Ferramentas deste conector:",
         linhas,
-    ])
+    ]
+    return nl.join(p for p in partes if p.strip())

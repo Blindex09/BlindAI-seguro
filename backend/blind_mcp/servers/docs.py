@@ -149,19 +149,37 @@ def _resolve_vision_key(api_key: Optional[str] = None) -> str:
     )
 
 
+URL_MAX_BYTES = 30 * 1024 * 1024
+
+
+async def _baixar_link(url: str) -> bytes:
+    """Baixa um arquivo de um link publico da web (http/https), sem rede interna (remote_fetch.py)."""
+    from .. import remote_fetch
+
+    try:
+        return await remote_fetch.baixar(url, URL_MAX_BYTES)
+    except ValueError as exc:
+        raise ValueError(str(exc)) from exc
+
+
+
 @mcp.tool()
 async def read_document(
     file_path: Optional[str] = None,
     file_base64: Optional[str] = None,
+    url: Optional[str] = None,
     pages: Optional[str] = None,
     ocr_scanned: bool = True,
     continuar: bool = False,
 ) -> Dict[str, Any]:
-    """Extrai o texto de um PDF (por caminho ou base64, opcionalmente filtrando paginas ex: '1-3,5').
+    """Extrai o texto de um PDF (por caminho, base64 ou link publico da web `url`, opcionalmente filtrando paginas ex: '1-3,5').
     Se o PDF for digitalizado como imagem (sem texto selecionavel) e ocr_scanned=True, renderiza as
     paginas e executa OCR/audiodescricao automatica via modelo de visao.
     O Blind guarda ate onde voce leu cada arquivo (`ultima_pagina_lida`). Com continuar=true le as proximas 3 paginas depois
     dessa posicao ("continua de onde parou"). Veja document_outline para pular por titulo."""
+    if url and not file_base64:
+        file_base64 = base64.b64encode(await _baixar_link(url)).decode("ascii")
+        file_path = None
     retomada: Optional[int] = None
     if continuar and file_path and not (pages or "").strip():
         saved = _load_positions().get(_pos_key(file_path))
@@ -724,6 +742,7 @@ async def web_read(url: str, max_chars: int = 15000) -> Dict[str, Any]:
 async def describe_image(
     file_path: Optional[str] = None,
     image_base64: Optional[str] = None,
+    url: Optional[str] = None,
     prompt: Optional[str] = None,
     provider: str = "auto",
     model: Optional[str] = None,
@@ -731,6 +750,9 @@ async def describe_image(
 ) -> str:
     """Gera audiodescricao acessivel de uma imagem com um modelo multimodal (roteado por capacidade de visao). Se voltar que
     nenhum modelo de visao respondeu, use ver_imagem: ela entrega a imagem ao modelo da conversa para descrever."""
+    if url and not image_base64:  # imagem de um link publico da web
+        image_base64 = base64.b64encode(await _baixar_link(url)).decode("ascii")
+        file_path = None
     resolved_key = _resolve_vision_key(api_key)
     return await smart_vision_router.describe_multimodal(
         image_base64=image_base64,
@@ -743,7 +765,7 @@ async def describe_image(
 
 
 @mcp.tool(structured_output=False)
-async def ver_imagem(file_path: str, pergunta: Optional[str] = None) -> List[Any]:
+async def ver_imagem(file_path: Optional[str] = None, pergunta: Optional[str] = None, url: Optional[str] = None) -> List[Any]:
     """Entrega uma imagem (foto, captura, anexo) ao modelo de IA da conversa para ELE descrever, sem depender de chave de visao.
     Use quando describe_image falhar (sem modelo de visao) ou quando o proprio Claude estiver conversando. A imagem e reduzida
     (maximo 1568 px) e segue para o modelo da conversa: a mesma nuvem que a pessoa ja usa. Depois de ver, descreva seguindo a
@@ -754,14 +776,20 @@ async def ver_imagem(file_path: str, pergunta: Optional[str] = None) -> List[Any
     from mcp.types import TextContent
     from PIL import Image as PILImage
 
-    p = Path(file_path).expanduser()
-    if not p.is_file():
-        raise ValueError("Não achei esse arquivo de imagem.")
-    if p.stat().st_size > 30 * 1024 * 1024:
-        raise ValueError("A imagem é grande demais (mais de 30 MB).")
+    web: Optional[bytes] = None
+    if url and not file_path:  # imagem de um link publico da web
+        web = await _baixar_link(url)
+    else:
+        if not file_path:
+            raise ValueError("Diga o arquivo ou o link da imagem.")
+        p = Path(file_path).expanduser()
+        if not p.is_file():
+            raise ValueError("Não achei esse arquivo de imagem.")
+        if p.stat().st_size > 30 * 1024 * 1024:
+            raise ValueError("A imagem é grande demais (mais de 30 MB).")
 
     def _preparar() -> bytes:
-        with PILImage.open(p) as im:
+        with PILImage.open(io.BytesIO(web) if web is not None else p) as im:
             im = im.convert("RGB")
             im.thumbnail((1568, 1568))
             buf = io.BytesIO()
