@@ -1,0 +1,64 @@
+diff --git a/src/windows_mcp/registry/service.py b/src/windows_mcp/registry/service.py
+index 405fae1..11ff637 100644
+--- a/src/windows_mcp/registry/service.py
++++ b/src/windows_mcp/registry/service.py
+@@ -39,6 +39,37 @@ _STORED_VALUE = (
+ )
+ 
+ 
++_NT_CURRENTVERSION = "software\\microsoft\\windows nt\\currentversion"
++
++
++def _windows_11_note(path: str, name: str, value: str) -> tuple[str, str]:
++    """Windows 11 still stores "Windows 10 ..." in ProductName for compatibility.
++
++    Reading that value as-is tells the user the wrong operating system. When the
++    key is HKLM\\...\\Windows NT\\CurrentVersion, the value is ProductName and the
++    build number is 22000 or higher, return the corrected name and a short note.
++    Returns (value, note); note is empty when nothing was corrected.
++    """
++    try:
++        normalized = path.lower().replace("hklm:", "").replace("hkey_local_machine", "").replace("/", "\\").strip("\\ ")
++        if normalized != _NT_CURRENTVERSION or name.lower() != "productname" or not value.startswith("Windows 10"):
++            return value, ""
++        import winreg
++
++        with winreg.OpenKey(winreg.HKEY_LOCAL_MACHINE, "SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion") as key:
++            build = int(winreg.QueryValueEx(key, "CurrentBuildNumber")[0])
++    except Exception:  # noqa: BLE001 - never break the read because of the correction
++        return value, ""
++    if build < 22000:
++        return value, ""
++    corrected = "Windows 11" + value[len("Windows 10"):]
++    note = (
++        f' [corrected: the registry still says "{value}" for compatibility; '
++        f"build {build} is Windows 11, so the real name is \"{corrected}\"]"
++    )
++    return corrected, note
++
++
+ def get_value(path: str, name: str) -> str:
+     """Read a registry value at *path* with the given *name*.
+ 
+@@ -70,7 +101,8 @@ def get_value(path: str, name: str) -> str:
+     # Drop only the line break Write-Output adds; the value may end in its own.
+     kind, _, value = response.partition("\n")
+     value = value.removesuffix("\n").removesuffix("\r")
+-    return f'Registry value [{path}] "{name}" (type: {kind.strip()}) = {value}'
++    value, note = _windows_11_note(path, name, value)
++    return f'Registry value [{path}] "{name}" (type: {kind.strip()}) = {value}{note}'
+ 
+ 
+ def _parse_binary(value: str) -> list[int]:
+@@ -201,4 +233,10 @@ def list_key(path: str) -> str:
+     response, status = PowerShellExecutor.execute_command(command)
+     if status != 0:
+         return f'Error listing registry: {response.strip()}'
+-    return f'Registry key [{path}]:\n{response.strip()}'
++    text = response.strip()
++    match = re.search(r"^ProductName \(String\)\s*:\s*(.*)$", text, flags=re.MULTILINE)
++    if match:
++        fixed, note = _windows_11_note(path, "ProductName", match.group(1).strip())
++        if note:
++            text = text[: match.start(1)] + fixed + note + text[match.end(1):]
++    return f'Registry key [{path}]:\n{text}'

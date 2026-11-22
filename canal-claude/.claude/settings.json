@@ -1,0 +1,47 @@
+{
+  "permissions": {
+    "defaultMode": "dontAsk",
+    "allow": [
+      "ToolSearch",
+      "Monitor",
+      "Bash(python vigia.py)",
+      "PowerShell(python vigia.py)",
+      "mcp__blind",
+      "mcp__blind-memory",
+      "mcp__blind-schedule",
+      "mcp__blind-docs",
+      "mcp__blind-channels",
+      "mcp__blind-speech",
+      "mcp__blind-system",
+      "mcp__blind-commander",
+      "mcp__blind-a11y",
+      "mcp__windows",
+      "mcp__agent-desktop",
+      "mcp__3ea192e9-6eb0-4f27-9ea1-78970ffad333",
+      "mcp__bf5fc025-ee05-4e1e-a04f-e8f802c65f22",
+      "mcp__ce28faba-b6a9-4b67-8a61-3bfe1a1c2dc6"
+    ],
+    "deny": [
+      "Edit",
+      "Write",
+      "NotebookEdit",
+      "Read",
+      "Glob",
+      "Grep",
+      "WebFetch",
+      "WebSearch",
+      "Agent",
+      "mcp__blind-stt__transcribe",
+      "mcp__blind-stt__prepare",
+      "mcp__blind-stt__stt_status",
+      "mcp__blind-channels__telegram_connect",
+      "mcp__blind-channels__whatsapp_pair",
+      "mcp__blind-a11y__glow_health_check",
+      "mcp__blind-a11y__glow_audit_document",
+      "mcp__blind-a11y__glow_fix_document",
+      "mcp__blind-a11y__glow_convert_document",
+      "mcp__blind-a11y__glow_generate_report"
+    ]
+  },
+  "enableAllProjectMcpServers": true
+}

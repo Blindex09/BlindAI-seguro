@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self'; img-src 'self' data: blob:; media-src 'self' blob:; font-src 'self'; connect-src 'none'; base-uri 'none'; form-action 'none'">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Blind</title>
+  <link rel="stylesheet" href="styles/app.css">
+</head>
+<body>
+  <div class="app">
+    <header class="app-header" role="banner">
+      <span class="app-title" aria-hidden="true">Blind</span>
+      <p id="system-status" class="status-island" role="status" aria-live="polite">
+        <span class="status-dot" aria-hidden="true"></span>
+        <span id="system-status-text">Iniciando...</span>
+      </p>
+      <button type="button" id="header-account-btn" class="header-account-btn" aria-label="Conta e assinatura. Atalho Alt+Shift+U">Conta</button>
+    </header>
+
+    <nav id="nav" class="app-nav" aria-label="Navegação rápida"></nav>
+
+    <main id="main" class="app-main" tabindex="-1"></main>
+
+    <footer id="quickbar" class="app-quickbar" role="region" aria-label="Falar ou digitar com o Blind"></footer>
+  </div>
+
+  <!-- Regioes ao vivo para leitores de tela: nunca removidas do DOM -->
+  <div id="sr-polite" class="sr-only" role="status" aria-live="polite" aria-atomic="true"></div>
+  <div id="sr-assertive" class="sr-only" role="alert" aria-live="assertive" aria-atomic="true"></div>
+
+  <dialog id="dialog" class="dialog" aria-labelledby="dialog-title"></dialog>
+
+  <script type="module" src="js/main.js"></script>
+</body>
+</html>

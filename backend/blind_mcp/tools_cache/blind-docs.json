@@ -1,0 +1,536 @@
+{
+  "server": "blind-docs",
+  "instructions": null,
+  "tools": [
+    {
+      "name": "read_document",
+      "description": "Extrai o texto de um PDF (por caminho ou base64, opcionalmente filtrando paginas ex: '1-3,5').\nSe o PDF for digitalizado como imagem (sem texto selecionavel) e ocr_scanned=True, renderiza as\npaginas e executa OCR/audiodescricao automatica via modelo de visao.\nO Blind guarda ate onde voce leu cada arquivo (`ultima_pagina_lida`). Com continuar=true le as proximas 3 paginas depois\ndessa posicao (\"continua de onde parou\"). Veja document_outline para pular por titulo.",
+      "inputSchema": {
+        "properties": {
+          "file_path": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "File Path"
+          },
+          "file_base64": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "File Base64"
+          },
+          "pages": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Pages"
+          },
+          "ocr_scanned": {
+            "default": true,
+            "title": "Ocr Scanned",
+            "type": "boolean"
+          },
+          "continuar": {
+            "default": false,
+            "title": "Continuar",
+            "type": "boolean"
+          }
+        },
+        "title": "read_documentArguments",
+        "type": "object"
+      },
+      "outputSchema": {
+        "properties": {
+          "result": {
+            "additionalProperties": true,
+            "title": "Result",
+            "type": "object"
+          }
+        },
+        "required": [
+          "result"
+        ],
+        "title": "read_documentOutput",
+        "type": "object"
+      }
+    },
+    {
+      "name": "document_outline",
+      "description": "Mostra o sumario de um PDF (titulos e paginas) e ate onde a pessoa ja leu. Use para pular direto a uma parte:\ndepois chame read_document com pages='12-14'.",
+      "inputSchema": {
+        "properties": {
+          "file_path": {
+            "title": "File Path",
+            "type": "string"
+          }
+        },
+        "required": [
+          "file_path"
+        ],
+        "title": "document_outlineArguments",
+        "type": "object"
+      },
+      "outputSchema": {
+        "properties": {
+          "result": {
+            "additionalProperties": true,
+            "title": "Result",
+            "type": "object"
+          }
+        },
+        "required": [
+          "result"
+        ],
+        "title": "document_outlineOutput",
+        "type": "object"
+      }
+    },
+    {
+      "name": "pdf_forms",
+      "description": "Lista todos os campos de formulario preenchiveis de um PDF (nome, rotulo, tipo, valor atual e pagina).",
+      "inputSchema": {
+        "properties": {
+          "file_path": {
+            "title": "File Path",
+            "type": "string"
+          }
+        },
+        "required": [
+          "file_path"
+        ],
+        "title": "pdf_formsArguments",
+        "type": "object"
+      },
+      "outputSchema": {
+        "properties": {
+          "result": {
+            "additionalProperties": true,
+            "title": "Result",
+            "type": "object"
+          }
+        },
+        "required": [
+          "result"
+        ],
+        "title": "pdf_formsOutput",
+        "type": "object"
+      }
+    },
+    {
+      "name": "pdf_fill",
+      "description": "Preenche os campos de um formulario PDF (fields = {'nome_do_campo': 'valor'}) e salva em output_path.",
+      "inputSchema": {
+        "properties": {
+          "file_path": {
+            "title": "File Path",
+            "type": "string"
+          },
+          "output_path": {
+            "title": "Output Path",
+            "type": "string"
+          },
+          "fields": {
+            "additionalProperties": true,
+            "title": "Fields",
+            "type": "object"
+          }
+        },
+        "required": [
+          "file_path",
+          "output_path",
+          "fields"
+        ],
+        "title": "pdf_fillArguments",
+        "type": "object"
+      },
+      "outputSchema": {
+        "properties": {
+          "result": {
+            "additionalProperties": true,
+            "title": "Result",
+            "type": "object"
+          }
+        },
+        "required": [
+          "result"
+        ],
+        "title": "pdf_fillOutput",
+        "type": "object"
+      }
+    },
+    {
+      "name": "pdf_merge_split",
+      "description": "Junta varios PDFs ('merge') ou extrai um intervalo de paginas ('split', ex: pages='1-3,5') em um novo PDF.",
+      "inputSchema": {
+        "properties": {
+          "action": {
+            "title": "Action",
+            "type": "string"
+          },
+          "output_path": {
+            "title": "Output Path",
+            "type": "string"
+          },
+          "input_paths": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Input Paths",
+            "type": "array"
+          },
+          "pages": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Pages"
+          }
+        },
+        "required": [
+          "action",
+          "output_path",
+          "input_paths"
+        ],
+        "title": "pdf_merge_splitArguments",
+        "type": "object"
+      },
+      "outputSchema": {
+        "properties": {
+          "result": {
+            "additionalProperties": true,
+            "title": "Result",
+            "type": "object"
+          }
+        },
+        "required": [
+          "result"
+        ],
+        "title": "pdf_merge_splitOutput",
+        "type": "object"
+      }
+    },
+    {
+      "name": "web_search",
+      "description": "Pesquisa na web e devolve resultados limpos (titulo, link e resumo) sem anuncios ou poluicao visual.",
+      "inputSchema": {
+        "properties": {
+          "query": {
+            "title": "Query",
+            "type": "string"
+          },
+          "max_results": {
+            "default": 5,
+            "title": "Max Results",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "query"
+        ],
+        "title": "web_searchArguments",
+        "type": "object"
+      },
+      "outputSchema": {
+        "properties": {
+          "result": {
+            "additionalProperties": true,
+            "title": "Result",
+            "type": "object"
+          }
+        },
+        "required": [
+          "result"
+        ],
+        "title": "web_searchOutput",
+        "type": "object"
+      }
+    },
+    {
+      "name": "web_read",
+      "description": "Abre uma pagina web e extrai apenas o texto principal e os titulos, sem banners, menus ou anuncios,\nideal para leitura direta por pessoas cegas.",
+      "inputSchema": {
+        "properties": {
+          "url": {
+            "title": "Url",
+            "type": "string"
+          },
+          "max_chars": {
+            "default": 15000,
+            "title": "Max Chars",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "url"
+        ],
+        "title": "web_readArguments",
+        "type": "object"
+      },
+      "outputSchema": {
+        "properties": {
+          "result": {
+            "additionalProperties": true,
+            "title": "Result",
+            "type": "object"
+          }
+        },
+        "required": [
+          "result"
+        ],
+        "title": "web_readOutput",
+        "type": "object"
+      }
+    },
+    {
+      "name": "describe_image",
+      "description": "Gera audiodescricao acessivel de uma imagem com um modelo multimodal (roteado por capacidade de visao). Se voltar que\nnenhum modelo de visao respondeu, use ver_imagem: ela entrega a imagem ao modelo da conversa para descrever.",
+      "inputSchema": {
+        "properties": {
+          "file_path": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "File Path"
+          },
+          "image_base64": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Image Base64"
+          },
+          "prompt": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Prompt"
+          },
+          "provider": {
+            "default": "auto",
+            "title": "Provider",
+            "type": "string"
+          },
+          "model": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Model"
+          },
+          "api_key": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Api Key"
+          }
+        },
+        "title": "describe_imageArguments",
+        "type": "object"
+      },
+      "outputSchema": {
+        "properties": {
+          "result": {
+            "title": "Result",
+            "type": "string"
+          }
+        },
+        "required": [
+          "result"
+        ],
+        "title": "describe_imageOutput",
+        "type": "object"
+      }
+    },
+    {
+      "name": "ver_imagem",
+      "description": "Entrega uma imagem (foto, captura, anexo) ao modelo de IA da conversa para ELE descrever, sem depender de chave de visao.\nUse quando describe_image falhar (sem modelo de visao) ou quando o proprio Claude estiver conversando. A imagem e reduzida\n(maximo 1568 px) e segue para o modelo da conversa: a mesma nuvem que a pessoa ja usa. Depois de ver, descreva seguindo a\nhabilidade descrevendo-imagens. Se a imagem tiver dado sensivel (remedio, conta, documento), leia com falar_em_segredo.",
+      "inputSchema": {
+        "properties": {
+          "file_path": {
+            "title": "File Path",
+            "type": "string"
+          },
+          "pergunta": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Pergunta"
+          }
+        },
+        "required": [
+          "file_path"
+        ],
+        "title": "ver_imagemArguments",
+        "type": "object"
+      }
+    },
+    {
+      "name": "documento_acessibilidade",
+      "description": "Confere a acessibilidade de um documento (.docx, .xlsx, .pptx ou .pdf) para leitor de tela: titulo do arquivo, titulos\nde secao ou slide, texto alternativo de imagens, cabecalho de planilha, linhas vazias, celulas mescladas, texto real no PDF.\nDevolve `problemas` com como corrigir e `resumo_falado`. E uma conferencia rapida e local; diga o que ela conferiu (`conferiu`).\nUse depois de criar um documento ou quando a pessoa perguntar se um arquivo e acessivel.",
+      "inputSchema": {
+        "properties": {
+          "file_path": {
+            "title": "File Path",
+            "type": "string"
+          }
+        },
+        "required": [
+          "file_path"
+        ],
+        "title": "documento_acessibilidadeArguments",
+        "type": "object"
+      },
+      "outputSchema": {
+        "properties": {
+          "result": {
+            "additionalProperties": true,
+            "title": "Result",
+            "type": "object"
+          }
+        },
+        "required": [
+          "result"
+        ],
+        "title": "documento_acessibilidadeOutput",
+        "type": "object"
+      }
+    },
+    {
+      "name": "writer_draft",
+      "description": "Prepara a minuta de um documento com revisao falada. Nada e gravado ate writer_save. O formato vem da extensao do\n`filename`: .docx (Word), .xlsx (planilha), .pptx (apresentacao), .pdf, .txt ou .md. Como escrever o `content`:\nxlsx = uma linha por linha da planilha, celulas separadas por ';' (1a linha = cabecalho, '## Nome' = nova aba; formulas\ncomo =SUM(B2:B3)); pptx = slides separados por linha em branco (1a linha = titulo, o resto = topicos); docx/pdf =\nparagrafos separados por linha em branco ('# ' = titulo no pdf).",
+      "inputSchema": {
+        "properties": {
+          "title": {
+            "title": "Title",
+            "type": "string"
+          },
+          "content": {
+            "title": "Content",
+            "type": "string"
+          },
+          "filename": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Filename"
+          }
+        },
+        "required": [
+          "title",
+          "content"
+        ],
+        "title": "writer_draftArguments",
+        "type": "object"
+      },
+      "outputSchema": {
+        "properties": {
+          "result": {
+            "additionalProperties": true,
+            "title": "Result",
+            "type": "object"
+          }
+        },
+        "required": [
+          "result"
+        ],
+        "title": "writer_draftOutput",
+        "type": "object"
+      }
+    },
+    {
+      "name": "writer_save",
+      "description": "Grava no disco a minuta aprovada pelo usuario, de forma segura e atomica.",
+      "inputSchema": {
+        "properties": {
+          "draft": {
+            "additionalProperties": true,
+            "title": "Draft",
+            "type": "object"
+          }
+        },
+        "required": [
+          "draft"
+        ],
+        "title": "writer_saveArguments",
+        "type": "object"
+      },
+      "outputSchema": {
+        "properties": {
+          "result": {
+            "additionalProperties": true,
+            "title": "Result",
+            "type": "object"
+          }
+        },
+        "required": [
+          "result"
+        ],
+        "title": "writer_saveOutput",
+        "type": "object"
+      }
+    }
+  ]
+}

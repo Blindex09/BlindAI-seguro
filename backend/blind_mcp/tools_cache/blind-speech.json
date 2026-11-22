@@ -1,0 +1,90 @@
+{
+  "server": "blind-speech",
+  "instructions": null,
+  "tools": [
+    {
+      "name": "speak",
+      "description": "Fala o texto em voz alta pelo alto-falante. rate vai de -10 (lento) a 10 (rapido).",
+      "inputSchema": {
+        "properties": {
+          "text": {
+            "title": "Text",
+            "type": "string"
+          },
+          "rate": {
+            "default": 0,
+            "title": "Rate",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "text"
+        ],
+        "title": "speakArguments",
+        "type": "object"
+      },
+      "outputSchema": {
+        "properties": {
+          "result": {
+            "additionalProperties": true,
+            "title": "Result",
+            "type": "object"
+          }
+        },
+        "required": [
+          "result"
+        ],
+        "title": "speakOutput",
+        "type": "object"
+      }
+    },
+    {
+      "name": "stop_speaking",
+      "description": "Interrompe a fala em andamento.",
+      "inputSchema": {
+        "properties": {},
+        "title": "stop_speakingArguments",
+        "type": "object"
+      },
+      "outputSchema": {
+        "properties": {
+          "result": {
+            "additionalProperties": true,
+            "title": "Result",
+            "type": "object"
+          }
+        },
+        "required": [
+          "result"
+        ],
+        "title": "stop_speakingOutput",
+        "type": "object"
+      }
+    },
+    {
+      "name": "list_voices",
+      "description": "Lista as vozes SAPI instaladas.",
+      "inputSchema": {
+        "properties": {},
+        "title": "list_voicesArguments",
+        "type": "object"
+      },
+      "outputSchema": {
+        "properties": {
+          "result": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Result",
+            "type": "array"
+          }
+        },
+        "required": [
+          "result"
+        ],
+        "title": "list_voicesOutput",
+        "type": "object"
+      }
+    }
+  ]
+}

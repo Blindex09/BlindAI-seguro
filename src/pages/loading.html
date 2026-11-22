@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'unsafe-inline'">
+  <title>Blind AI - Iniciando</title>
+  <style>
+    :root { --bg:#0f172a; --card:#1e293b; --text:#f8fafc; --muted:#cbd5e1; --accent:#38bdf8; --border:#334155; }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: system-ui, 'Segoe UI', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 2rem; }
+    main { max-width: 640px; width: 100%; background: var(--card); border: 2px solid var(--border); border-radius: 16px; padding: 2.5rem; text-align: center; }
+    h1 { color: var(--accent); font-size: 2rem; margin-bottom: 1rem; }
+    p { font-size: 1.2rem; line-height: 1.6; color: var(--muted); }
+    #detail { margin-top: 1rem; font-size: 1rem; }
+    .spinner { width: 48px; height: 48px; margin: 0 auto 1.5rem; border: 5px solid var(--border); border-top-color: var(--accent); border-radius: 50%; animation: spin 1s linear infinite; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    @media (prefers-reduced-motion: reduce) { .spinner { animation: none; border-top-color: var(--border); } }
+  </style>
+</head>
+<body>
+  <main>
+    <div class="spinner" aria-hidden="true"></div>
+    <h1 id="title" tabindex="-1">Iniciando o Blind AI</h1>
+    <p id="status" role="status" aria-live="polite">Aguarde, iniciando o serviço local.</p>
+    <p id="detail" aria-live="off"></p>
+  </main>
+  <script src="loading.js"></script>
+</body>
+</html>

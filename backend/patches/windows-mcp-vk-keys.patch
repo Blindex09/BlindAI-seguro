@@ -1,0 +1,23 @@
+diff --git a/src/windows_mcp/uia/core.py b/src/windows_mcp/uia/core.py
+index c444004..2687d23 100644
+--- a/src/windows_mcp/uia/core.py
++++ b/src/windows_mcp/uia/core.py
+@@ -1467,6 +1467,18 @@ def SendUnicodeChar(char: str, charMode: bool = True) -> int:
+                 KeyboardInput(0, unit, KeyboardEventFlag.KeyUnicode | KeyboardEventFlag.KeyUp),
+             )
+         return ret
++    if charMode and os.environ.get("WINDOWS_MCP_VK_KEYS", "1") != "0":
++        # Apps UWP/XAML (Calculadora, Configuracoes...) ignoram eventos KEYEVENTF_UNICODE (vk=0) e so reagem
++        # a teclas virtuais. Para caracteres que existem no layout sem Shift/Ctrl/Alt (digitos, letras
++        # minusculas, espaco) manda a tecla virtual real; o resto segue pelo caminho Unicode.
++        res = ctypes.windll.user32.VkKeyScanW(ctypes.wintypes.WCHAR(char))
++        if res != -1 and (res >> 8) & 0xFF == 0:
++            vk = res & 0xFF
++            scan = ctypes.windll.user32.MapVirtualKeyW(vk, 0)
++            return SendInput(
++                KeyboardInput(vk, scan, KeyboardEventFlag.KeyDown),
++                KeyboardInput(vk, scan, KeyboardEventFlag.KeyUp),
++            )
+     if charMode:
+         vk = 0
+         scan = ord(char)

@@ -1,0 +1,10 @@
+{
+  "permissions": {
+    "deny": [
+      "mcp__blind-stt__transcribe",
+      "mcp__blind-stt__prepare",
+      "mcp__blind-stt__stt_status",
+      "mcp__blind-channels__telegram_connect"
+    ]
+  }
+}

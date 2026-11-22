@@ -1,0 +1,67 @@
+{
+  "mcpServers": {
+    "blind-docs": {
+      "description": "Documentos acessiveis (PDF digital e escaneado com OCR/visao, formularios PDF), audiodescricao de imagem, escrita assistida e leitura/busca limpa da web.",
+      "command": "${PYTHON}",
+      "args": [
+        "-m",
+        "blind_mcp.servers.docs"
+      ],
+      "cwd": "${BACKEND_DIR}",
+      "env": {
+        "PYTHONUTF8": "1"
+      },
+      "callTimeout": 120,
+      "lazy": true
+    },
+    "blind-speech": {
+      "description": "Fala offline pelo Windows SAPI.",
+      "command": "${PYTHON}",
+      "args": [
+        "-m",
+        "blind_mcp.servers.speech"
+      ],
+      "cwd": "${BACKEND_DIR}",
+      "env": {
+        "PYTHONUTF8": "1"
+      },
+      "lazy": true
+    },
+    "blind-memory": {
+      "description": "Memoria pessoal persistente, busca no historico de conversas e cofre de segredos.",
+      "command": "${PYTHON}",
+      "args": [
+        "-m",
+        "blind_mcp.servers.memory"
+      ],
+      "cwd": "${BACKEND_DIR}",
+      "env": {
+        "PYTHONUTF8": "1"
+      }
+    },
+    "blind-schedule": {
+      "description": "Agendamento do Blind: tarefas e lembretes falados (blindschedule_create, blindschedule_list, blindschedule_snooze, blindschedule_delete).",
+      "command": "${PYTHON}",
+      "args": [
+        "-m",
+        "blind_mcp.servers.schedule"
+      ],
+      "cwd": "${BACKEND_DIR}",
+      "env": {
+        "PYTHONUTF8": "1"
+      }
+    },
+    "blind-system": {
+      "description": "Diagnostico somente leitura: diario de acoes do Blind, saude do teclado e deteccao de trabalho nao salvo. Nao aperta teclas nem muda nada.",
+      "command": "${PYTHON}",
+      "args": [
+        "-m",
+        "blind_mcp.servers.system"
+      ],
+      "cwd": "${BACKEND_DIR}",
+      "env": {
+        "PYTHONUTF8": "1"
+      }
+    }
+  }
+}

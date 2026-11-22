@@ -1,0 +1,33 @@
+# Dependencias do backend do Blind AI (versoes com que a migracao MCP foi testada, Python 3.14).
+fastapi==0.162.0
+uvicorn==0.54.0
+httpx==0.28.1
+pydantic==2.13.5
+mcp==1.30.0
+python-dotenv==1.2.3
+pymupdf==1.28.2
+pillow==12.3.0
+# Word, planilha e apresentacao (writer_draft/writer_save e read_document)
+python-docx==1.2.0
+openpyxl==3.1.5
+python-pptx==1.0.2
+pywin32==312
+uiautomation==2.0.29
+faster-whisper==1.2.1
+# O PyAV 17+ quebra o faster-whisper 1.2.1 (av.open sem metadata_errors). So e usado para audio que nao seja WAV.
+av>=14,<17
+
+# Gmail e Drive (blind-google)
+google-api-python-client==2.202.0
+google-auth==2.62.2
+google-auth-httplib2==0.4.4
+google-auth-oauthlib==1.5.0
+
+# Testes
+pytest==9.1.1
+pytest-asyncio==1.4.0
+psutil==7.2.2
+
+# Servidores MCP de terceiros (rodam como processos separados, nao sao importados):
+#   Windows-MCP   -> uv run --directory "%REPOS_DIR%\Windows-MCP" windows-mcp serve   (Python 3.14+)
+#   agent-desktop -> npm install -g agent-desktop

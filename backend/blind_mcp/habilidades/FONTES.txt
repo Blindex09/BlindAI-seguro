@@ -1,0 +1,38 @@
+Fontes das habilidades do Blind (pesquisa de 17/11/2026). Conferir e atualizar quando mudar uma habilidade.
+
+Descrever imagens: Perkins School for the Blind (como escrever texto alternativo, 2026); RNIB (como escrever texto alternativo);
+  Universidade de Maryland, "Say It My Way" (Be My AI: respostas mais de 10x maiores que as perguntas; descricao inteira da
+  cena no comeco atrapalha; divulgacao progressiva); Sakib et al., "XAI para usuarios cegos e com baixa visao" (CHI 2026 workshop,
+  arXiv 2604.00187: vies de culpa, confianca conforme o risco, conversa para contestar, confirmar antes de acoes irreversiveis).
+Agir no computador: Kodandaram et al., "Are We There Yet?" (arXiv 2609.00524, 88 usuarios cegos, 1.258 comandos; agentes
+  completaram 37,9% a 52,5%; falhas: localizar controle, depender de memoria, planejar, lembrar condicoes, terminar).
+Documentos e planilhas: WebAIM (Excel: cabecalhos, linhas vazias, titulo); pesquisa WebAIM de leitores de tela #11 (2026:
+  60,1% usam IA para descrever imagens; 85,6% esperam problemas com PDF; problemas mais citados em 2024: captcha, elementos que
+  nao se comportam como esperado, links ou botoes sem sentido, telas que mudam sozinhas, formularios complexos).
+Texto para ser ouvido: guias de escrita para leitura em voz alta (pontuacao, datas, numeros, siglas, URLs); Microsoft Learn,
+  "Accessibility and inclusion for agent design" (sons para concluido e erro, evitar sobrecarga, usuario controla o ritmo).
+Como escrever skills: Anthropic, "Skill authoring best practices" (concisas, descricao do que faz e quando usar, no maximo
+  500 linhas, uma camada de referencias, testar com modelos menores).
+Projetos abertos reaproveitados (ideias, sem copiar codigo):
+  - rperez030/accessible-agent-skills (MIT): avisos falados no inicio, nos pontos de virada, no fim, em erros e ao esperar
+    permissao; resposta curta e dita; sinal sonoro ao terminar. Virou o item 9 de tarefas-em-varios-passos.
+  - Community-Access/accessibility-agents (MIT, 113 skills, servidor MCP com 39 scanners): regras de acessibilidade de documentos
+    Office e PDF. Reescrevemos uma conferencia propria e local (core/writer/acessibilidade_docs.py). Nao instalamos o pacote: as
+    ferramentas glow_* enviam arquivos para um servico externo (letitglow.app).
+  - cartertemm/AI-content-describer (addon do NVDA, licenca nao confirmada): ideias de recursos (descrever a janela em foco, a
+    area de transferencia, a tela inteira, perguntas de acompanhamento, modelo local). Sem codigo copiado.
+  - codingaslu/Voice-Vision-Assistant-for-Blind (proprietario, todos os direitos reservados): so ideias. Registrou que modelos
+    recusam descrever pessoas em fotos, o que o Blind precisa tratar.
+  - VizWiz (vizwiz.org, Universidade do Texas): fotos e perguntas reais de pessoas cegas; defeitos de imagem mais comuns.
+  - anthropics/skills (xlsx): licenca restritiva, so ideias (calcular formulas, evitar funcoes sem suporte, legenda e fontes).
+Be My Eyes / Be My AI (support.bemyeyes.com, bemyeyes.com/blog, Perkins): descreve rostos mas nao identifica pessoas; o modelo
+  pode desfocar rostos ou recusar (setembro de 2023) e a comunidade cega protestou: querem descricao basica de pessoas; perguntas
+  de acompanhamento e fotos extras; pede outra foto se estiver ruim; sempre ha o voluntario humano; nao usar para remedio ou dados
+  financeiros; entrega a resposta inteira de uma vez, sem mostrar palavra por palavra, para o leitor de tela.
+Complemento Vision Assistant Pro do NVDA (GPL, instalado no computador do usuario, so ideias): descricao de video em trechos
+  com tempo absoluto; dicionario de pessoas confirmadas pelo usuario; descrever o rosto so na primeira aparicao e depois so o
+  nome; nunca adivinhar nome pelo rosto; comecar direto pela descricao, sem "a imagem mostra".
+Decisao do Blind (usuario, 18/11/2026), diferente do Be My Eyes: remedio, dinheiro e documentos DEVEM ser lidos, porque a pessoa
+  cega nem sempre tem alguem; a protecao vem do cofre (habilidade dados-sensiveis, backend/blind_mcp/cofre.py): fala sem expor.
+Lacunas: nao consegui abrir o texto de varios estudos sobre assistentes de voz (Springer, ACM). Os principios de voz vieram
+  do estudo de Maryland, do XAI de 2026, do estudo com agentes de computador e de boas praticas de TTS.

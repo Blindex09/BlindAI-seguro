@@ -1,0 +1,758 @@
+{
+  "server": "agent-desktop",
+  "instructions": null,
+  "tools": [
+    {
+      "name": "status",
+      "description": "Estado do agent-desktop: plataforma, permissoes de acessibilidade e superficies suportadas.",
+      "inputSchema": {
+        "properties": {},
+        "title": "statusArguments",
+        "type": "object"
+      }
+    },
+    {
+      "name": "list_windows",
+      "description": "Lista as janelas abertas (opcionalmente de um aplicativo): titulo, app, se esta em foco ou minimizada e o id\n(window_id) para usar em snapshot/window_action.",
+      "inputSchema": {
+        "properties": {
+          "app": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "App"
+          }
+        },
+        "title": "list_windowsArguments",
+        "type": "object"
+      }
+    },
+    {
+      "name": "list_apps",
+      "description": "Lista os aplicativos em execucao com janelas visiveis.",
+      "inputSchema": {
+        "properties": {
+          "app": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "App"
+          }
+        },
+        "title": "list_appsArguments",
+        "type": "object"
+      }
+    },
+    {
+      "name": "snapshot",
+      "description": "Le a arvore de acessibilidade da janela e devolve elementos com @ref_id para usar nas outras ferramentas.\n`app` aceita o nome do aplicativo ou parte do titulo da janela (ex: 'calculadora', 'chrome').\nSempre chame de novo depois de agir para confirmar o resultado.",
+      "inputSchema": {
+        "properties": {
+          "app": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "App"
+          },
+          "window_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Window Id"
+          },
+          "interactive_only": {
+            "default": true,
+            "title": "Interactive Only",
+            "type": "boolean"
+          },
+          "max_items": {
+            "default": 60,
+            "title": "Max Items",
+            "type": "integer"
+          }
+        },
+        "title": "snapshotArguments",
+        "type": "object"
+      },
+      "outputSchema": {
+        "properties": {
+          "result": {
+            "title": "Result",
+            "type": "string"
+          }
+        },
+        "required": [
+          "result"
+        ],
+        "title": "snapshotOutput",
+        "type": "object"
+      }
+    },
+    {
+      "name": "find",
+      "description": "Procura elementos por nome visivel e/ou papel (button, edit, listitem...). Devolve @ref_id.",
+      "inputSchema": {
+        "properties": {
+          "name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Name"
+          },
+          "role": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Role"
+          },
+          "app": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "App"
+          },
+          "window_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Window Id"
+          }
+        },
+        "title": "findArguments",
+        "type": "object"
+      }
+    },
+    {
+      "name": "get_property",
+      "description": "Le uma propriedade de um elemento. prop aceita: text, value, title, bounds, role, states.\nSe der STALE_REF, a tela mudou: use find (por nome) ou snapshot para pegar um @ref novo.",
+      "inputSchema": {
+        "properties": {
+          "ref_id": {
+            "title": "Ref Id",
+            "type": "string"
+          },
+          "prop": {
+            "default": "text",
+            "title": "Prop",
+            "type": "string"
+          }
+        },
+        "required": [
+          "ref_id"
+        ],
+        "title": "get_propertyArguments",
+        "type": "object"
+      }
+    },
+    {
+      "name": "screenshot",
+      "description": "Salva uma captura da janela e devolve o caminho do arquivo.",
+      "inputSchema": {
+        "properties": {
+          "app": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "App"
+          },
+          "window_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Window Id"
+          },
+          "path": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Path"
+          }
+        },
+        "title": "screenshotArguments",
+        "type": "object"
+      }
+    },
+    {
+      "name": "click",
+      "description": "Aciona um elemento pelo @ref_id pela acessibilidade (clique simples ou menu de contexto), sem mouse real.\nDevolve `resultado` e `mudancas` (janelas que abriram, fecharam ou mudaram de titulo): leia o resumo para a pessoa.\nSe o app nao aceitar a acao, devolve erro: nao ha como forcar com mouse ou teclado.",
+      "inputSchema": {
+        "properties": {
+          "ref_id": {
+            "title": "Ref Id",
+            "type": "string"
+          },
+          "kind": {
+            "default": "click",
+            "enum": [
+              "click",
+              "right"
+            ],
+            "title": "Kind",
+            "type": "string"
+          }
+        },
+        "required": [
+          "ref_id"
+        ],
+        "title": "clickArguments",
+        "type": "object"
+      }
+    },
+    {
+      "name": "double_click",
+      "description": "Duplo clique (ou triplo com triplo=true, que seleciona a linha) em um elemento pelo @ref_id. Devolve `mudancas`.",
+      "inputSchema": {
+        "properties": {
+          "ref_id": {
+            "title": "Ref Id",
+            "type": "string"
+          },
+          "triplo": {
+            "default": false,
+            "title": "Triplo",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "ref_id"
+        ],
+        "title": "double_clickArguments",
+        "type": "object"
+      }
+    },
+    {
+      "name": "hover",
+      "description": "Passa o ponteiro sobre um elemento (abre menus e dicas que so aparecem ao passar o mouse). Devolve `mudancas`.",
+      "inputSchema": {
+        "properties": {
+          "ref_id": {
+            "title": "Ref Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "ref_id"
+        ],
+        "title": "hoverArguments",
+        "type": "object"
+      }
+    },
+    {
+      "name": "press_keys",
+      "description": "Aperta teclas ou atalhos EM UMA JANELA que voce escolhe (app ou window_id e obrigatorio), ex: 'enter', 'tab', 'ctrl+s',\n'alt+f4', 'f5'. A ferramenta da foco na janela, CONFIRMA que ela ficou em foco e so entao aperta; se nao conseguir, nao\naperta nada e diz isso. Nunca aperta teclas na janela do proprio Claude. Use quando click/type_text nao bastam (Enter para\nenviar formulario, atalho de menu). Um guarda solta tecla presa logo depois. Antes de atalhos que fecham, enviam ou apagam,\nconfirme com a pessoa. Devolve `mudancas`: leia o resumo e confira o resultado.",
+      "inputSchema": {
+        "properties": {
+          "keys": {
+            "title": "Keys",
+            "type": "string"
+          },
+          "app": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "App"
+          },
+          "window_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Window Id"
+          }
+        },
+        "required": [
+          "keys"
+        ],
+        "title": "press_keysArguments",
+        "type": "object"
+      }
+    },
+    {
+      "name": "type_text",
+      "description": "Escreve texto em um campo pelo @ref_id, direto pelo valor do campo (sem apertar teclas).\nCom replace=true troca o conteudo todo; com replace=false acrescenta ao fim do que ja existe.\nDevolve `confirmado` (o campo ficou mesmo com o texto?) e `mudancas`. So diga que escreveu se confirmado for true.",
+      "inputSchema": {
+        "properties": {
+          "ref_id": {
+            "title": "Ref Id",
+            "type": "string"
+          },
+          "text": {
+            "title": "Text",
+            "type": "string"
+          },
+          "replace": {
+            "default": false,
+            "title": "Replace",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "ref_id",
+          "text"
+        ],
+        "title": "type_textArguments",
+        "type": "object"
+      }
+    },
+    {
+      "name": "element_action",
+      "description": "Acao simples em um elemento, pela acessibilidade: focar, limpar, alternar, marcar, expandir, rolar ate ele ou selecionar um valor.",
+      "inputSchema": {
+        "properties": {
+          "ref_id": {
+            "title": "Ref Id",
+            "type": "string"
+          },
+          "action": {
+            "enum": [
+              "focus",
+              "clear",
+              "toggle",
+              "check",
+              "uncheck",
+              "expand",
+              "collapse",
+              "scroll_to",
+              "select"
+            ],
+            "title": "Action",
+            "type": "string"
+          },
+          "value": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Value"
+          }
+        },
+        "required": [
+          "ref_id",
+          "action"
+        ],
+        "title": "element_actionArguments",
+        "type": "object"
+      }
+    },
+    {
+      "name": "descrever_janela",
+      "description": "Plano B quando um app nao expoe seus elementos na acessibilidade: captura a janela e pede a um modelo de visao\numa descricao falada (botoes, textos, mensagens de erro, onde esta cada coisa). So le a tela; nao clica nem digita.\n`pergunta` e opcional (ex: 'o que diz o aviso vermelho?'). Pode demorar alguns segundos e usa a chave de visao configurada.",
+      "inputSchema": {
+        "properties": {
+          "app": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "App"
+          },
+          "window_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Window Id"
+          },
+          "pergunta": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Pergunta"
+          }
+        },
+        "title": "descrever_janelaArguments",
+        "type": "object"
+      }
+    },
+    {
+      "name": "scroll",
+      "description": "Rola um elemento rolavel.",
+      "inputSchema": {
+        "properties": {
+          "ref_id": {
+            "title": "Ref Id",
+            "type": "string"
+          },
+          "direction": {
+            "default": "down",
+            "enum": [
+              "up",
+              "down",
+              "left",
+              "right"
+            ],
+            "title": "Direction",
+            "type": "string"
+          },
+          "amount": {
+            "default": 3,
+            "title": "Amount",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "ref_id"
+        ],
+        "title": "scrollArguments",
+        "type": "object"
+      }
+    },
+    {
+      "name": "launch_app",
+      "description": "Abre um aplicativo pelo nome ou caminho e opcionalmente o traz para frente. So diz que abriu se a janela\naparecer de fato; senao tenta outro caminho e, se ainda falhar, devolve erro (nunca um falso sucesso).",
+      "inputSchema": {
+        "properties": {
+          "target": {
+            "title": "Target",
+            "type": "string"
+          },
+          "activate": {
+            "default": true,
+            "title": "Activate",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "target"
+        ],
+        "title": "launch_appArguments",
+        "type": "object"
+      }
+    },
+    {
+      "name": "close_app",
+      "description": "Fecha um aplicativo. Use force=true somente se o fechamento normal falhar.",
+      "inputSchema": {
+        "properties": {
+          "app": {
+            "title": "App",
+            "type": "string"
+          },
+          "force": {
+            "default": false,
+            "title": "Force",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "app"
+        ],
+        "title": "close_appArguments",
+        "type": "object"
+      }
+    },
+    {
+      "name": "window_action",
+      "description": "Foca, minimiza, maximiza ou restaura uma janela por aplicativo ou window_id.",
+      "inputSchema": {
+        "properties": {
+          "action": {
+            "enum": [
+              "focus",
+              "minimize",
+              "maximize",
+              "restore"
+            ],
+            "title": "Action",
+            "type": "string"
+          },
+          "app": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "App"
+          },
+          "window_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Window Id"
+          }
+        },
+        "required": [
+          "action"
+        ],
+        "title": "window_actionArguments",
+        "type": "object"
+      }
+    },
+    {
+      "name": "notifications",
+      "description": "Lista ou dispensa notificacoes do Windows.",
+      "inputSchema": {
+        "properties": {
+          "action": {
+            "default": "list",
+            "enum": [
+              "list",
+              "dismiss",
+              "dismiss_all"
+            ],
+            "title": "Action",
+            "type": "string"
+          },
+          "index": {
+            "default": 0,
+            "title": "Index",
+            "type": "integer"
+          }
+        },
+        "title": "notificationsArguments",
+        "type": "object"
+      }
+    },
+    {
+      "name": "clipboard",
+      "description": "Le, define ou limpa a area de transferencia.",
+      "inputSchema": {
+        "properties": {
+          "action": {
+            "default": "get",
+            "enum": [
+              "get",
+              "set",
+              "clear"
+            ],
+            "title": "Action",
+            "type": "string"
+          },
+          "text": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Text"
+          }
+        },
+        "title": "clipboardArguments",
+        "type": "object"
+      }
+    },
+    {
+      "name": "wait_for",
+      "description": "Espera um elemento, texto ou janela aparecer, ou apenas uma pausa em milissegundos.",
+      "inputSchema": {
+        "properties": {
+          "element": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Element"
+          },
+          "text": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Text"
+          },
+          "window": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Window"
+          },
+          "ms": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Ms"
+          },
+          "timeout_ms": {
+            "default": 10000,
+            "title": "Timeout Ms",
+            "type": "integer"
+          }
+        },
+        "title": "wait_forArguments",
+        "type": "object"
+      }
+    },
+    {
+      "name": "screen_context",
+      "description": "Estado geral da tela e da bandeja do sistema (janelas abertas e icones reais da area de notificacao) via UI Automation.",
+      "inputSchema": {
+        "properties": {},
+        "title": "screen_contextArguments",
+        "type": "object"
+      },
+      "outputSchema": {
+        "properties": {
+          "result": {
+            "title": "Result",
+            "type": "string"
+          }
+        },
+        "required": [
+          "result"
+        ],
+        "title": "screen_contextOutput",
+        "type": "object"
+      }
+    },
+    {
+      "name": "list_tray",
+      "description": "Lista todos os icones e botoes presentes na bandeja do sistema (area de notificacao e overflow) via UI Automation.",
+      "inputSchema": {
+        "properties": {},
+        "title": "list_trayArguments",
+        "type": "object"
+      },
+      "outputSchema": {
+        "properties": {
+          "result": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "title": "Result",
+            "type": "array"
+          }
+        },
+        "required": [
+          "result"
+        ],
+        "title": "list_trayOutput",
+        "type": "object"
+      }
+    }
+  ]
+}

@@ -1,0 +1,3781 @@
+{
+  "server": "blind-a11y",
+  "instructions": null,
+  "tools": [
+    {
+      "name": "check_contrast",
+      "title": "Check Contrast Ratio",
+      "description": "Calculate WCAG contrast ratio between two colors. Returns the ratio and whether it passes AA for normal text (4.5:1), large text (3:1), and UI components (3:1).",
+      "inputSchema": {
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "type": "object",
+        "properties": {
+          "foreground": {
+            "type": "string",
+            "description": "Foreground color as hex (e.g. \"#1a1a1a\" or \"#fff\")"
+          },
+          "background": {
+            "type": "string",
+            "description": "Background color as hex (e.g. \"#ffffff\" or \"#000\")"
+          }
+        },
+        "required": [
+          "foreground",
+          "background"
+        ]
+      },
+      "outputSchema": {
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "type": "object",
+        "properties": {
+          "value": {
+            "description": "The measured value.",
+            "type": "number"
+          },
+          "unit": {
+            "description": "What the value is measured in.",
+            "type": "string"
+          },
+          "threshold": {
+            "description": "The value required to pass.",
+            "type": "number"
+          },
+          "passes": {
+            "type": "boolean",
+            "description": "Whether the measurement meets the threshold."
+          },
+          "level": {
+            "description": "The conformance level this result is judged against.",
+            "type": "string"
+          },
+          "detail": {
+            "description": "A short explanation of the result.",
+            "type": "string"
+          }
+        },
+        "required": [
+          "passes"
+        ],
+        "additionalProperties": false
+      },
+      "annotations": {
+        "title": "Check Contrast Ratio",
+        "readOnlyHint": true,
+        "idempotentHint": true,
+        "openWorldHint": false
+      },
+      "execution": {
+        "taskSupport": "forbidden"
+      }
+    },
+    {
+      "name": "check_apca_contrast",
+      "title": "Check APCA Contrast (Experimental)",
+      "description": "Calculate APCA lightness contrast between two colours, an experimental perceptual method that no WCAG standard, and not the current WCAG 3.0 draft, includes.",
+      "inputSchema": {
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "type": "object",
+        "properties": {
+          "foreground": {
+            "type": "string",
+            "description": "Text color as hex (e.g. \"#1a1a1a\" or \"#fff\")"
+          },
+          "background": {
+            "type": "string",
+            "description": "Background color as hex (e.g. \"#ffffff\" or \"#000\")"
+          }
+        },
+        "required": [
+          "foreground",
+          "background"
+        ]
+      },
+      "outputSchema": {
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "type": "object",
+        "properties": {
+          "value": {
+            "description": "The measured value.",
+            "type": "number"
+          },
+          "unit": {
+            "description": "What the value is measured in.",
+            "type": "string"
+          },
+          "threshold": {
+            "description": "The value required to pass.",
+            "type": "number"
+          },
+          "passes": {
+            "type": "boolean",
+            "description": "Whether the measurement meets the threshold."
+          },
+          "level": {
+            "description": "The conformance level this result is judged against.",
+            "type": "string"
+          },
+          "detail": {
+            "description": "A short explanation of the result.",
+            "type": "string"
+          }
+        },
+        "required": [
+          "passes"
+        ],
+        "additionalProperties": false
+      },
+      "annotations": {
+        "title": "Check APCA Contrast (Experimental)",
+        "readOnlyHint": true,
+        "idempotentHint": true,
+        "openWorldHint": false
+      },
+      "execution": {
+        "taskSupport": "forbidden"
+      }
+    },
+    {
+      "name": "get_accessibility_guidelines",
+      "title": "Get Accessibility Guidelines",
+      "description": "Get detailed WCAG AA accessibility guidelines for a specific component type. Returns requirements, code examples, and common mistakes.",
+      "inputSchema": {
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "type": "object",
+        "properties": {
+          "component": {
+            "type": "string",
+            "enum": [
+              "modal",
+              "tabs",
+              "accordion",
+              "combobox",
+              "carousel",
+              "form",
+              "live-region",
+              "navigation",
+              "general"
+            ],
+            "description": "The type of component to get guidelines for"
+          }
+        },
+        "required": [
+          "component"
+        ]
+      },
+      "outputSchema": {
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "type": "object",
+        "properties": {
+          "ok": {
+            "type": "boolean",
+            "description": "Whether the operation succeeded."
+          },
+          "detail": {
+            "description": "What happened, in one sentence.",
+            "type": "string"
+          },
+          "path": {
+            "description": "A file this call wrote or read, when there is one.",
+            "type": "string"
+          },
+          "version": {
+            "description": "Version of an external tool, when relevant.",
+            "type": "string"
+          }
+        },
+        "required": [
+          "ok"
+        ],
+        "additionalProperties": false
+      },
+      "annotations": {
+        "title": "Get Accessibility Guidelines",
+        "readOnlyHint": true,
+        "idempotentHint": true,
+        "openWorldHint": false
+      },
+      "execution": {
+        "taskSupport": "forbidden"
+      }
+    },
+    {
+      "name": "check_heading_structure",
+      "title": "Check Heading Structure",
+      "description": "Analyze HTML content for heading hierarchy issues: skipped levels, multiple H1s, missing H1.",
+      "inputSchema": {
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "type": "object",
+        "properties": {
+          "html": {
+            "type": "string",
+            "description": "HTML content to analyze"
+          }
+        },
+        "required": [
+          "html"
+        ]
+      },
+      "outputSchema": {
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "type": "object",
+        "properties": {
+          "scope": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Files, URLs or components examined."
+          },
+          "findings": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "rule": {
+                  "type": "string",
+                  "description": "Stable rule identifier."
+                },
+                "wcag": {
+                  "type": "string",
+                  "description": "WCAG 2.2 criterion and level, or 'n/a'."
+                },
+                "severity": {
+                  "type": "string",
+                  "enum": [
+                    "critical",
+                    "serious",
+                    "moderate",
+                    "minor"
+                  ]
+                },
+                "confidence": {
+                  "type": "string",
+                  "enum": [
+                    "high",
+                    "medium",
+                    "low"
+                  ]
+                },
+                "location": {
+                  "type": "string",
+                  "description": "Where the defect is, precisely enough to open."
+                },
+                "summary": {
+                  "type": "string",
+                  "description": "One sentence naming the defect."
+                },
+                "fix": {
+                  "type": "string",
+                  "description": "What to change."
+                },
+                "evidence": {
+                  "description": "The offending markup, value or measurement.",
+                  "type": "string"
+                },
+                "component": {
+                  "description": "Component or template, when the defect repeats.",
+                  "type": "string"
+                }
+              },
+              "required": [
+                "rule",
+                "wcag",
+                "severity",
+                "location",
+                "summary",
+                "fix"
+              ],
+              "additionalProperties": false
+            },
+            "description": "One entry per defect found."
+          },
+          "passed": {
+            "description": "Checks that ran and found nothing, so 'clean' is distinguishable from 'not checked'.",
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "notes": {
+            "description": "Anything a person must decide, and anything that could not be checked.",
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "required": [
+          "scope",
+          "findings"
+        ],
+        "additionalProperties": false
+      },
+      "annotations": {
+        "title": "Check Heading Structure",
+        "readOnlyHint": true,
+        "idempotentHint": true,
+        "openWorldHint": false
+      },
+      "execution": {
+        "taskSupport": "forbidden"
+      }
+    },
+    {
+      "name": "check_link_text",
+      "title": "Check Link Text",
+      "description": "Analyze HTML for ambiguous or missing link text. Checks for 'click here', 'read more', empty links.",
+      "inputSchema": {
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "type": "object",
+        "properties": {
+          "html": {
+            "type": "string",
+            "description": "HTML content to analyze"
+          }
+        },
+        "required": [
+          "html"
+        ]
+      },
+      "outputSchema": {
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "type": "object",
+        "properties": {
+          "scope": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Files, URLs or components examined."
+          },
+          "findings": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "rule": {
+                  "type": "string",
+                  "description": "Stable rule identifier."
+                },
+                "wcag": {
+                  "type": "string",
+                  "description": "WCAG 2.2 criterion and level, or 'n/a'."
+                },
+                "severity": {
+                  "type": "string",
+                  "enum": [
+                    "critical",
+                    "serious",
+                    "moderate",
+                    "minor"
+                  ]
+                },
+                "confidence": {
+                  "type": "string",
+                  "enum": [
+                    "high",
+                    "medium",
+                    "low"
+                  ]
+                },
+                "location": {
+                  "type": "string",
+                  "description": "Where the defect is, precisely enough to open."
+                },
+                "summary": {
+                  "type": "string",
+                  "description": "One sentence naming the defect."
+                },
+                "fix": {
+                  "type": "string",
+                  "description": "What to change."
+                },
+                "evidence": {
+                  "description": "The offending markup, value or measurement.",
+                  "type": "string"
+                },
+                "component": {
+                  "description": "Component or template, when the defect repeats.",
+                  "type": "string"
+                }
+              },
+              "required": [
+                "rule",
+                "wcag",
+                "severity",
+                "location",
+                "summary",
+                "fix"
+              ],
+              "additionalProperties": false
+            },
+            "description": "One entry per defect found."
+          },
+          "passed": {
+            "description": "Checks that ran and found nothing, so 'clean' is distinguishable from 'not checked'.",
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "notes": {
+            "description": "Anything a person must decide, and anything that could not be checked.",
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "required": [
+          "scope",
+          "findings"
+        ],
+        "additionalProperties": false
+      },
+      "annotations": {
+        "title": "Check Link Text",
+        "readOnlyHint": true,
+        "idempotentHint": true,
+        "openWorldHint": false
+      },
+      "execution": {
+        "taskSupport": "forbidden"
+      }
+    },
+    {
+      "name": "check_form_labels",
+      "title": "Check Form Labels",
+      "description": "Analyze HTML form inputs for missing accessible labels. Checks <label for>, aria-label, aria-labelledby, and title.",
+      "inputSchema": {
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "type": "object",
+        "properties": {
+          "html": {
+            "type": "string",
+            "description": "HTML content to analyze"
+          }
+        },
+        "required": [
+          "html"
+        ]
+      },
+      "outputSchema": {
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "type": "object",
+        "properties": {
+          "scope": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Files, URLs or components examined."
+          },
+          "findings": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "rule": {
+                  "type": "string",
+                  "description": "Stable rule identifier."
+                },
+                "wcag": {
+                  "type": "string",
+                  "description": "WCAG 2.2 criterion and level, or 'n/a'."
+                },
+                "severity": {
+                  "type": "string",
+                  "enum": [
+                    "critical",
+                    "serious",
+                    "moderate",
+                    "minor"
+                  ]
+                },
+                "confidence": {
+                  "type": "string",
+                  "enum": [
+                    "high",
+                    "medium",
+                    "low"
+                  ]
+                },
+                "location": {
+                  "type": "string",
+                  "description": "Where the defect is, precisely enough to open."
+                },
+                "summary": {
+                  "type": "string",
+                  "description": "One sentence naming the defect."
+                },
+                "fix": {
+                  "type": "string",
+                  "description": "What to change."
+                },
+                "evidence": {
+                  "description": "The offending markup, value or measurement.",
+                  "type": "string"
+                },
+                "component": {
+                  "description": "Component or template, when the defect repeats.",
+                  "type": "string"
+                }
+              },
+              "required": [
+                "rule",
+                "wcag",
+                "severity",
+                "location",
+                "summary",
+                "fix"
+              ],
+              "additionalProperties": false
+            },
+            "description": "One entry per defect found."
+          },
+          "passed": {
+            "description": "Checks that ran and found nothing, so 'clean' is distinguishable from 'not checked'.",
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "notes": {
+            "description": "Anything a person must decide, and anything that could not be checked.",
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "required": [
+          "scope",
+          "findings"
+        ],
+        "additionalProperties": false
+      },
+      "annotations": {
+        "title": "Check Form Labels",
+        "readOnlyHint": true,
+        "idempotentHint": true,
+        "openWorldHint": false
+      },
+      "execution": {
+        "taskSupport": "forbidden"
+      }
+    },
+    {
+      "name": "scan_office_document",
+      "title": "Scan Office Document for Accessibility",
+      "description": "Scan a .docx, .xlsx, or .pptx file for accessibility issues. Checks title, language, alt text, headings, table headers, and more.",
+      "inputSchema": {
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "type": "object",
+        "properties": {
+          "filePath": {
+            "type": "string",
+            "description": "Absolute path to the Office document"
+          }
+        },
+        "required": [
+          "filePath"
+        ]
+      },
+      "outputSchema": {
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "type": "object",
+        "properties": {
+          "scope": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Files, URLs or components examined."
+          },
+          "findings": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "rule": {
+                  "type": "string",
+                  "description": "Stable rule identifier."
+                },
+                "wcag": {
+                  "type": "string",
+                  "description": "WCAG 2.2 criterion and level, or 'n/a'."
+                },
+                "severity": {
+                  "type": "string",
+                  "enum": [
+                    "critical",
+                    "serious",
+                    "moderate",
+                    "minor"
+                  ]
+                },
+                "confidence": {
+                  "type": "string",
+                  "enum": [
+                    "high",
+                    "medium",
+                    "low"
+                  ]
+                },
+                "location": {
+                  "type": "string",
+                  "description": "Where the defect is, precisely enough to open."
+                },
+                "summary": {
+                  "type": "string",
+                  "description": "One sentence naming the defect."
+                },
+                "fix": {
+                  "type": "string",
+                  "description": "What to change."
+                },
+                "evidence": {
+                  "description": "The offending markup, value or measurement.",
+                  "type": "string"
+                },
+                "component": {
+                  "description": "Component or template, when the defect repeats.",
+                  "type": "string"
+                }
+              },
+              "required": [
+                "rule",
+                "wcag",
+                "severity",
+                "location",
+                "summary",
+                "fix"
+              ],
+              "additionalProperties": false
+            },
+            "description": "One entry per defect found."
+          },
+          "passed": {
+            "description": "Checks that ran and found nothing, so 'clean' is distinguishable from 'not checked'.",
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "notes": {
+            "description": "Anything a person must decide, and anything that could not be checked.",
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "required": [
+          "scope",
+          "findings"
+        ],
+        "additionalProperties": false
+      },
+      "annotations": {
+        "title": "Scan Office Document for Accessibility",
+        "readOnlyHint": true,
+        "idempotentHint": true,
+        "openWorldHint": false
+      },
+      "_meta": {
+        "anthropic/maxResultSizeChars": 60000
+      },
+      "execution": {
+        "taskSupport": "forbidden"
+      }
+    },
+    {
+      "name": "scan_pdf_document",
+      "title": "Scan PDF Document for Accessibility",
+      "description": "Scan a PDF file for accessibility issues using PDF/UA checks. Checks tagging, structure, language, alt text, bookmarks, forms, and more.",
+      "inputSchema": {
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "type": "object",
+        "properties": {
+          "filePath": {
+            "type": "string",
+            "description": "Absolute path to the PDF file"
+          },
+          "reportPath": {
+            "description": "File path to write a markdown accessibility report",
+            "type": "string"
+          },
+          "sarifPath": {
+            "description": "File path to write SARIF 2.1.0 output",
+            "type": "string"
+          }
+        },
+        "required": [
+          "filePath"
+        ]
+      },
+      "outputSchema": {
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "type": "object",
+        "properties": {
+          "scope": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Files, URLs or components examined."
+          },
+          "findings": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "rule": {
+                  "type": "string",
+                  "description": "Stable rule identifier."
+                },
+                "wcag": {
+                  "type": "string",
+                  "description": "WCAG 2.2 criterion and level, or 'n/a'."
+                },
+                "severity": {
+                  "type": "string",
+                  "enum": [
+                    "critical",
+                    "serious",
+                    "moderate",
+                    "minor"
+                  ]
+                },
+                "confidence": {
+                  "type": "string",
+                  "enum": [
+                    "high",
+                    "medium",
+                    "low"
+                  ]
+                },
+                "location": {
+                  "type": "string",
+                  "description": "Where the defect is, precisely enough to open."
+                },
+                "summary": {
+                  "type": "string",
+                  "description": "One sentence naming the defect."
+                },
+                "fix": {
+                  "type": "string",
+                  "description": "What to change."
+                },
+                "evidence": {
+                  "description": "The offending markup, value or measurement.",
+                  "type": "string"
+                },
+                "component": {
+                  "description": "Component or template, when the defect repeats.",
+                  "type": "string"
+                }
+              },
+              "required": [
+                "rule",
+                "wcag",
+                "severity",
+                "location",
+                "summary",
+                "fix"
+              ],
+              "additionalProperties": false
+            },
+            "description": "One entry per defect found."
+          },
+          "passed": {
+            "description": "Checks that ran and found nothing, so 'clean' is distinguishable from 'not checked'.",
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "notes": {
+            "description": "Anything a person must decide, and anything that could not be checked.",
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "required": [
+          "scope",
+          "findings"
+        ],
+        "additionalProperties": false
+      },
+      "annotations": {
+        "title": "Scan PDF Document for Accessibility",
+        "readOnlyHint": true,
+        "idempotentHint": true,
+        "openWorldHint": false
+      },
+      "_meta": {
+        "anthropic/maxResultSizeChars": 60000
+      },
+      "execution": {
+        "taskSupport": "forbidden"
+      }
+    },
+    {
+      "name": "extract_document_metadata",
+      "title": "Extract Document Metadata",
+      "description": "Extract accessibility-relevant metadata from an Office document or PDF. Returns title, author, language, page count, and accessibility property health.",
+      "inputSchema": {
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "type": "object",
+        "properties": {
+          "filePath": {
+            "type": "string",
+            "description": "Absolute path to the document file (.docx, .xlsx, .pptx, or .pdf)"
+          }
+        },
+        "required": [
+          "filePath"
+        ]
+      },
+      "outputSchema": {
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "type": "object",
+        "properties": {
+          "ok": {
+            "type": "boolean",
+            "description": "Whether the operation succeeded."
+          },
+          "detail": {
+            "description": "What happened, in one sentence.",
+            "type": "string"
+          },
+          "path": {
+            "description": "A file this call wrote or read, when there is one.",
+            "type": "string"
+          },
+          "version": {
+            "description": "Version of an external tool, when relevant.",
+            "type": "string"
+          }
+        },
+        "required": [
+          "ok"
+        ],
+        "additionalProperties": false
+      },
+      "annotations": {
+        "title": "Extract Document Metadata",
+        "readOnlyHint": true,
+        "idempotentHint": true,
+        "openWorldHint": false
+      },
+      "execution": {
+        "taskSupport": "forbidden"
+      }
+    },
+    {
+      "name": "batch_scan_documents",
+      "title": "Batch Scan Documents",
+      "description": "Scan multiple Office and PDF documents for accessibility issues in a single call. Returns a summary with per-file results.",
+      "inputSchema": {
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "type": "object",
+        "properties": {
+          "filePaths": {
+            "maxItems": 50,
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Array of absolute file paths to scan (max 50)"
+          }
+        },
+        "required": [
+          "filePaths"
+        ]
+      },
+      "outputSchema": {
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "type": "object",
+        "properties": {
+          "scope": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Files, URLs or components examined."
+          },
+          "findings": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "rule": {
+                  "type": "string",
+                  "description": "Stable rule identifier."
+                },
+                "wcag": {
+                  "type": "string",
+                  "description": "WCAG 2.2 criterion and level, or 'n/a'."
+                },
+                "severity": {
+                  "type": "string",
+                  "enum": [
+                    "critical",
+                    "serious",
+                    "moderate",
+                    "minor"
+                  ]
+                },
+                "confidence": {
+                  "type": "string",
+                  "enum": [
+                    "high",
+                    "medium",
+                    "low"
+                  ]
+                },
+                "location": {
+                  "type": "string",
+                  "description": "Where the defect is, precisely enough to open."
+                },
+                "summary": {
+                  "type": "string",
+                  "description": "One sentence naming the defect."
+                },
+                "fix": {
+                  "type": "string",
+                  "description": "What to change."
+                },
+                "evidence": {
+                  "description": "The offending markup, value or measurement.",
+                  "type": "string"
+                },
+                "component": {
+                  "description": "Component or template, when the defect repeats.",
+                  "type": "string"
+                }
+              },
+              "required": [
+                "rule",
+                "wcag",
+                "severity",
+                "location",
+                "summary",
+                "fix"
+              ],
+              "additionalProperties": false
+            },
+            "description": "One entry per defect found."
+          },
+          "passed": {
+            "description": "Checks that ran and found nothing, so 'clean' is distinguishable from 'not checked'.",
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "notes": {
+            "description": "Anything a person must decide, and anything that could not be checked.",
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "required": [
+          "scope",
+          "findings"
+        ],
+        "additionalProperties": false
+      },
+      "annotations": {
+        "title": "Batch Scan Documents",
+        "readOnlyHint": true,
+        "idempotentHint": true,
+        "openWorldHint": false
+      },
+      "_meta": {
+        "anthropic/maxResultSizeChars": 120000
+      },
+      "execution": {
+        "taskSupport": "forbidden"
+      }
+    },
+    {
+      "name": "run_axe_scan",
+      "title": "Run axe-core Accessibility Scan",
+      "description": "Run an axe-core scan against a URL or HTML file and return the violations as findings.",
+      "inputSchema": {
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "type": "object",
+        "properties": {
+          "url": {
+            "type": "string",
+            "description": "URL to scan (http or https)"
+          },
+          "tags": {
+            "description": "axe-core tags to filter by (default: [\"wcag2a\", \"wcag2aa\", \"wcag21a\", \"wcag21aa\", \"wcag22aa\"], every WCAG 2.2 A and AA rule)",
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "include": {
+            "description": "CSS selectors to include in scan",
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "exclude": {
+            "description": "CSS selectors to exclude from scan",
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "required": [
+          "url"
+        ]
+      },
+      "outputSchema": {
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "type": "object",
+        "properties": {
+          "scope": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Files, URLs or components examined."
+          },
+          "findings": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "rule": {
+                  "type": "string",
+                  "description": "Stable rule identifier."
+                },
+                "wcag": {
+                  "type": "string",
+                  "description": "WCAG 2.2 criterion and level, or 'n/a'."
+                },
+                "severity": {
+                  "type": "string",
+                  "enum": [
+                    "critical",
+                    "serious",
+                    "moderate",
+                    "minor"
+                  ]
+                },
+                "confidence": {
+                  "type": "string",
+                  "enum": [
+                    "high",
+                    "medium",
+                    "low"
+                  ]
+                },
+                "location": {
+                  "type": "string",
+                  "description": "Where the defect is, precisely enough to open."
+                },
+                "summary": {
+                  "type": "string",
+                  "description": "One sentence naming the defect."
+                },
+                "fix": {
+                  "type": "string",
+                  "description": "What to change."
+                },
+                "evidence": {
+                  "description": "The offending markup, value or measurement.",
+                  "type": "string"
+                },
+                "component": {
+                  "description": "Component or template, when the defect repeats.",
+                  "type": "string"
+                }
+              },
+              "required": [
+                "rule",
+                "wcag",
+                "severity",
+                "location",
+                "summary",
+                "fix"
+              ],
+              "additionalProperties": false
+            },
+            "description": "One entry per defect found."
+          },
+          "passed": {
+            "description": "Checks that ran and found nothing, so 'clean' is distinguishable from 'not checked'.",
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "notes": {
+            "description": "Anything a person must decide, and anything that could not be checked.",
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "required": [
+          "scope",
+          "findings"
+        ],
+        "additionalProperties": false
+      },
+      "annotations": {
+        "title": "Run axe-core Accessibility Scan",
+        "readOnlyHint": true,
+        "idempotentHint": true,
+        "openWorldHint": true
+      },
+      "_meta": {
+        "anthropic/maxResultSizeChars": 80000
+      },
+      "execution": {
+        "taskSupport": "forbidden"
+      }
+    },
+    {
+      "name": "run_playwright_a11y_tree",
+      "title": "Get Accessibility Tree",
+      "description": "Capture the accessibility tree of a page via Playwright. Shows how screen readers perceive the page structure.",
+      "inputSchema": {
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "type": "object",
+        "properties": {
+          "url": {
+            "type": "string",
+            "description": "URL to analyze"
+          },
+          "root": {
+            "description": "CSS selector for subtree root",
+            "type": "string"
+          }
+        },
+        "required": [
+          "url"
+        ]
+      },
+      "outputSchema": {
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "type": "object",
+        "properties": {
+          "scope": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Files, URLs or components examined."
+          },
+          "findings": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "rule": {
+                  "type": "string",
+                  "description": "Stable rule identifier."
+                },
+                "wcag": {
+                  "type": "string",
+                  "description": "WCAG 2.2 criterion and level, or 'n/a'."
+                },
+                "severity": {
+                  "type": "string",
+                  "enum": [
+                    "critical",
+                    "serious",
+                    "moderate",
+                    "minor"
+                  ]
+                },
+                "confidence": {
+                  "type": "string",
+                  "enum": [
+                    "high",
+                    "medium",
+                    "low"
+                  ]
+                },
+                "location": {
+                  "type": "string",
+                  "description": "Where the defect is, precisely enough to open."
+                },
+                "summary": {
+                  "type": "string",
+                  "description": "One sentence naming the defect."
+                },
+                "fix": {
+                  "type": "string",
+                  "description": "What to change."
+                },
+                "evidence": {
+                  "description": "The offending markup, value or measurement.",
+                  "type": "string"
+                },
+                "component": {
+                  "description": "Component or template, when the defect repeats.",
+                  "type": "string"
+                }
+              },
+              "required": [
+                "rule",
+                "wcag",
+                "severity",
+                "location",
+                "summary",
+                "fix"
+              ],
+              "additionalProperties": false
+            },
+            "description": "One entry per defect found."
+          },
+          "passed": {
+            "description": "Checks that ran and found nothing, so 'clean' is distinguishable from 'not checked'.",
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "notes": {
+            "description": "Anything a person must decide, and anything that could not be checked.",
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "required": [
+          "scope",
+          "findings"
+        ],
+        "additionalProperties": false
+      },
+      "annotations": {
+        "title": "Get Accessibility Tree",
+        "readOnlyHint": true,
+        "idempotentHint": true,
+        "openWorldHint": true
+      },
+      "_meta": {
+        "anthropic/maxResultSizeChars": 80000
+      },
+      "execution": {
+        "taskSupport": "forbidden"
+      }
+    },
+    {
+      "name": "run_playwright_keyboard_scan",
+      "title": "Keyboard Navigation Scan",
+      "description": "Test keyboard navigation by tabbing through all interactive elements on a page. Reports focus order, focus visibility, and keyboard traps.",
+      "inputSchema": {
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "type": "object",
+        "properties": {
+          "url": {
+            "type": "string",
+            "description": "URL to test"
+          },
+          "maxTabs": {
+            "description": "Maximum Tab presses (default: 50)",
+            "type": "number"
+          }
+        },
+        "required": [
+          "url"
+        ]
+      },
+      "outputSchema": {
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "type": "object",
+        "properties": {
+          "scope": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Files, URLs or components examined."
+          },
+          "findings": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "rule": {
+                  "type": "string",
+                  "description": "Stable rule identifier."
+                },
+                "wcag": {
+                  "type": "string",
+                  "description": "WCAG 2.2 criterion and level, or 'n/a'."
+                },
+                "severity": {
+                  "type": "string",
+                  "enum": [
+                    "critical",
+                    "serious",
+                    "moderate",
+                    "minor"
+                  ]
+                },
+                "confidence": {
+                  "type": "string",
+                  "enum": [
+                    "high",
+                    "medium",
+                    "low"
+                  ]
+                },
+                "location": {
+                  "type": "string",
+                  "description": "Where the defect is, precisely enough to open."
+                },
+                "summary": {
+                  "type": "string",
+                  "description": "One sentence naming the defect."
+                },
+                "fix": {
+                  "type": "string",
+                  "description": "What to change."
+                },
+                "evidence": {
+                  "description": "The offending markup, value or measurement.",
+                  "type": "string"
+                },
+                "component": {
+                  "description": "Component or template, when the defect repeats.",
+                  "type": "string"
+                }
+              },
+              "required": [
+                "rule",
+                "wcag",
+                "severity",
+                "location",
+                "summary",
+                "fix"
+              ],
+              "additionalProperties": false
+            },
+            "description": "One entry per defect found."
+          },
+          "passed": {
+            "description": "Checks that ran and found nothing, so 'clean' is distinguishable from 'not checked'.",
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "notes": {
+            "description": "Anything a person must decide, and anything that could not be checked.",
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "required": [
+          "scope",
+          "findings"
+        ],
+        "additionalProperties": false
+      },
+      "annotations": {
+        "title": "Keyboard Navigation Scan",
+        "readOnlyHint": true,
+        "idempotentHint": true,
+        "openWorldHint": true
+      },
+      "_meta": {
+        "anthropic/maxResultSizeChars": 80000
+      },
+      "execution": {
+        "taskSupport": "forbidden"
+      }
+    },
+    {
+      "name": "run_playwright_contrast_scan",
+      "title": "Visual Contrast Scan",
+      "description": "Scan a page for text elements that fail WCAG AA contrast requirements by sampling computed styles.",
+      "inputSchema": {
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "type": "object",
+        "properties": {
+          "url": {
+            "type": "string",
+            "description": "URL to scan"
+          }
+        },
+        "required": [
+          "url"
+        ]
+      },
+      "outputSchema": {
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "type": "object",
+        "properties": {
+          "scope": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Files, URLs or components examined."
+          },
+          "findings": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "rule": {
+                  "type": "string",
+                  "description": "Stable rule identifier."
+                },
+                "wcag": {
+                  "type": "string",
+                  "description": "WCAG 2.2 criterion and level, or 'n/a'."
+                },
+                "severity": {
+                  "type": "string",
+                  "enum": [
+                    "critical",
+                    "serious",
+                    "moderate",
+                    "minor"
+                  ]
+                },
+                "confidence": {
+                  "type": "string",
+                  "enum": [
+                    "high",
+                    "medium",
+                    "low"
+                  ]
+                },
+                "location": {
+                  "type": "string",
+                  "description": "Where the defect is, precisely enough to open."
+                },
+                "summary": {
+                  "type": "string",
+                  "description": "One sentence naming the defect."
+                },
+                "fix": {
+                  "type": "string",
+                  "description": "What to change."
+                },
+                "evidence": {
+                  "description": "The offending markup, value or measurement.",
+                  "type": "string"
+                },
+                "component": {
+                  "description": "Component or template, when the defect repeats.",
+                  "type": "string"
+                }
+              },
+              "required": [
+                "rule",
+                "wcag",
+                "severity",
+                "location",
+                "summary",
+                "fix"
+              ],
+              "additionalProperties": false
+            },
+            "description": "One entry per defect found."
+          },
+          "passed": {
+            "description": "Checks that ran and found nothing, so 'clean' is distinguishable from 'not checked'.",
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "notes": {
+            "description": "Anything a person must decide, and anything that could not be checked.",
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "required": [
+          "scope",
+          "findings"
+        ],
+        "additionalProperties": false
+      },
+      "annotations": {
+        "title": "Visual Contrast Scan",
+        "readOnlyHint": true,
+        "idempotentHint": true,
+        "openWorldHint": true
+      },
+      "_meta": {
+        "anthropic/maxResultSizeChars": 80000
+      },
+      "execution": {
+        "taskSupport": "forbidden"
+      }
+    },
+    {
+      "name": "run_playwright_viewport_scan",
+      "title": "Viewport Reflow Test",
+      "description": "Load the page at 320, 768, 1024 and 1280 CSS pixels wide and report horizontal scrolling, a WCAG 1.4.10 Reflow check that does not test zoom or text resize.",
+      "inputSchema": {
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "type": "object",
+        "properties": {
+          "url": {
+            "type": "string",
+            "description": "URL to test"
+          }
+        },
+        "required": [
+          "url"
+        ]
+      },
+      "outputSchema": {
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "type": "object",
+        "properties": {
+          "scope": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Files, URLs or components examined."
+          },
+          "findings": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "rule": {
+                  "type": "string",
+                  "description": "Stable rule identifier."
+                },
+                "wcag": {
+                  "type": "string",
+                  "description": "WCAG 2.2 criterion and level, or 'n/a'."
+                },
+                "severity": {
+                  "type": "string",
+                  "enum": [
+                    "critical",
+                    "serious",
+                    "moderate",
+                    "minor"
+                  ]
+                },
+                "confidence": {
+                  "type": "string",
+                  "enum": [
+                    "high",
+                    "medium",
+                    "low"
+                  ]
+                },
+                "location": {
+                  "type": "string",
+                  "description": "Where the defect is, precisely enough to open."
+                },
+                "summary": {
+                  "type": "string",
+                  "description": "One sentence naming the defect."
+                },
+                "fix": {
+                  "type": "string",
+                  "description": "What to change."
+                },
+                "evidence": {
+                  "description": "The offending markup, value or measurement.",
+                  "type": "string"
+                },
+                "component": {
+                  "description": "Component or template, when the defect repeats.",
+                  "type": "string"
+                }
+              },
+              "required": [
+                "rule",
+                "wcag",
+                "severity",
+                "location",
+                "summary",
+                "fix"
+              ],
+              "additionalProperties": false
+            },
+            "description": "One entry per defect found."
+          },
+          "passed": {
+            "description": "Checks that ran and found nothing, so 'clean' is distinguishable from 'not checked'.",
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "notes": {
+            "description": "Anything a person must decide, and anything that could not be checked.",
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "required": [
+          "scope",
+          "findings"
+        ],
+        "additionalProperties": false
+      },
+      "annotations": {
+        "title": "Viewport Reflow Test",
+        "readOnlyHint": true,
+        "idempotentHint": true,
+        "openWorldHint": true
+      },
+      "_meta": {
+        "anthropic/maxResultSizeChars": 80000
+      },
+      "execution": {
+        "taskSupport": "forbidden"
+      }
+    },
+    {
+      "name": "run_verapdf_scan",
+      "title": "Run veraPDF PDF/UA Scan",
+      "description": "Validate a PDF against PDF/UA with veraPDF and return the failed checks as findings.",
+      "inputSchema": {
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "type": "object",
+        "properties": {
+          "filePath": {
+            "type": "string",
+            "description": "Absolute path to the PDF file"
+          },
+          "flavour": {
+            "description": "veraPDF validation flavour (default: \"ua1\" for PDF/UA-1)",
+            "type": "string",
+            "enum": [
+              "4",
+              "ua1",
+              "ua2",
+              "1a",
+              "1b",
+              "2a",
+              "2b",
+              "2u",
+              "3a",
+              "3b",
+              "3u",
+              "4e",
+              "4f"
+            ]
+          },
+          "sarifPath": {
+            "description": "Optional path to write SARIF 2.1.0 output for CI/code scanning integration",
+            "type": "string"
+          }
+        },
+        "required": [
+          "filePath"
+        ]
+      },
+      "outputSchema": {
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "type": "object",
+        "properties": {
+          "scope": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Files, URLs or components examined."
+          },
+          "findings": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "rule": {
+                  "type": "string",
+                  "description": "Stable rule identifier."
+                },
+                "wcag": {
+                  "type": "string",
+                  "description": "WCAG 2.2 criterion and level, or 'n/a'."
+                },
+                "severity": {
+                  "type": "string",
+                  "enum": [
+                    "critical",
+                    "serious",
+                    "moderate",
+                    "minor"
+                  ]
+                },
+                "confidence": {
+                  "type": "string",
+                  "enum": [
+                    "high",
+                    "medium",
+                    "low"
+                  ]
+                },
+                "location": {
+                  "type": "string",
+                  "description": "Where the defect is, precisely enough to open."
+                },
+                "summary": {
+                  "type": "string",
+                  "description": "One sentence naming the defect."
+                },
+                "fix": {
+                  "type": "string",
+                  "description": "What to change."
+                },
+                "evidence": {
+                  "description": "The offending markup, value or measurement.",
+                  "type": "string"
+                },
+                "component": {
+                  "description": "Component or template, when the defect repeats.",
+                  "type": "string"
+                }
+              },
+              "required": [
+                "rule",
+                "wcag",
+                "severity",
+                "location",
+                "summary",
+                "fix"
+              ],
+              "additionalProperties": false
+            },
+            "description": "One entry per defect found."
+          },
+          "passed": {
+            "description": "Checks that ran and found nothing, so 'clean' is distinguishable from 'not checked'.",
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "notes": {
+            "description": "Anything a person must decide, and anything that could not be checked.",
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "required": [
+          "scope",
+          "findings"
+        ],
+        "additionalProperties": false
+      },
+      "annotations": {
+        "title": "Run veraPDF PDF/UA Scan",
+        "readOnlyHint": true,
+        "idempotentHint": true,
+        "openWorldHint": false
+      },
+      "_meta": {
+        "anthropic/maxResultSizeChars": 80000
+      },
+      "execution": {
+        "taskSupport": "forbidden"
+      }
+    },
+    {
+      "name": "check_verapdf_installation",
+      "title": "Check veraPDF Installation",
+      "description": "Health check for veraPDF CLI. Auto-detects installation, reports version, checks Java dependency, and provides platform-specific installation guidance if missing.",
+      "inputSchema": {
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "type": "object",
+        "properties": {}
+      },
+      "outputSchema": {
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "type": "object",
+        "properties": {
+          "ok": {
+            "type": "boolean",
+            "description": "Whether the operation succeeded."
+          },
+          "detail": {
+            "description": "What happened, in one sentence.",
+            "type": "string"
+          },
+          "path": {
+            "description": "A file this call wrote or read, when there is one.",
+            "type": "string"
+          },
+          "version": {
+            "description": "Version of an external tool, when relevant.",
+            "type": "string"
+          }
+        },
+        "required": [
+          "ok"
+        ],
+        "additionalProperties": false
+      },
+      "annotations": {
+        "title": "Check veraPDF Installation",
+        "readOnlyHint": true,
+        "idempotentHint": true,
+        "openWorldHint": false
+      },
+      "execution": {
+        "taskSupport": "forbidden"
+      }
+    },
+    {
+      "name": "convert_pdf_form_to_html",
+      "title": "Convert PDF Form to Accessible HTML",
+      "description": "Extract form fields from a PDF and generate an accessible HTML representation. Useful for reviewing PDF form accessibility or migrating paper forms to web.",
+      "inputSchema": {
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "type": "object",
+        "properties": {
+          "filePath": {
+            "type": "string",
+            "description": "Absolute path to the PDF file"
+          }
+        },
+        "required": [
+          "filePath"
+        ]
+      },
+      "outputSchema": {
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "type": "object",
+        "properties": {
+          "ok": {
+            "type": "boolean",
+            "description": "Whether the operation succeeded."
+          },
+          "detail": {
+            "description": "What happened, in one sentence.",
+            "type": "string"
+          },
+          "path": {
+            "description": "A file this call wrote or read, when there is one.",
+            "type": "string"
+          },
+          "version": {
+            "description": "Version of an external tool, when relevant.",
+            "type": "string"
+          }
+        },
+        "required": [
+          "ok"
+        ],
+        "additionalProperties": false
+      },
+      "annotations": {
+        "title": "Convert PDF Form to Accessible HTML",
+        "readOnlyHint": false,
+        "destructiveHint": false,
+        "idempotentHint": false,
+        "openWorldHint": false
+      },
+      "execution": {
+        "taskSupport": "forbidden"
+      }
+    },
+    {
+      "name": "scan_epub_document",
+      "title": "Scan EPUB Document",
+      "description": "Scan an .epub for EPUB Accessibility 1.1 conformance, reading order, navigation and metadata.",
+      "inputSchema": {
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "type": "object",
+        "properties": {
+          "filePath": {
+            "type": "string",
+            "description": "Absolute path to the .epub file"
+          },
+          "reportPath": {
+            "description": "Optional path to write a markdown accessibility report",
+            "type": "string"
+          },
+          "sarifPath": {
+            "description": "Optional path to write SARIF 2.1.0 output",
+            "type": "string"
+          }
+        },
+        "required": [
+          "filePath"
+        ]
+      },
+      "outputSchema": {
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "type": "object",
+        "properties": {
+          "scope": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Files, URLs or components examined."
+          },
+          "findings": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "rule": {
+                  "type": "string",
+                  "description": "Stable rule identifier."
+                },
+                "wcag": {
+                  "type": "string",
+                  "description": "WCAG 2.2 criterion and level, or 'n/a'."
+                },
+                "severity": {
+                  "type": "string",
+                  "enum": [
+                    "critical",
+                    "serious",
+                    "moderate",
+                    "minor"
+                  ]
+                },
+                "confidence": {
+                  "type": "string",
+                  "enum": [
+                    "high",
+                    "medium",
+                    "low"
+                  ]
+                },
+                "location": {
+                  "type": "string",
+                  "description": "Where the defect is, precisely enough to open."
+                },
+                "summary": {
+                  "type": "string",
+                  "description": "One sentence naming the defect."
+                },
+                "fix": {
+                  "type": "string",
+                  "description": "What to change."
+                },
+                "evidence": {
+                  "description": "The offending markup, value or measurement.",
+                  "type": "string"
+                },
+                "component": {
+                  "description": "Component or template, when the defect repeats.",
+                  "type": "string"
+                }
+              },
+              "required": [
+                "rule",
+                "wcag",
+                "severity",
+                "location",
+                "summary",
+                "fix"
+              ],
+              "additionalProperties": false
+            },
+            "description": "One entry per defect found."
+          },
+          "passed": {
+            "description": "Checks that ran and found nothing, so 'clean' is distinguishable from 'not checked'.",
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "notes": {
+            "description": "Anything a person must decide, and anything that could not be checked.",
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "required": [
+          "scope",
+          "findings"
+        ],
+        "additionalProperties": false
+      },
+      "annotations": {
+        "title": "Scan EPUB Document",
+        "readOnlyHint": true,
+        "idempotentHint": true,
+        "openWorldHint": false
+      },
+      "_meta": {
+        "anthropic/maxResultSizeChars": 60000
+      },
+      "execution": {
+        "taskSupport": "forbidden"
+      }
+    },
+    {
+      "name": "scan_markdown_document",
+      "title": "Scan Markdown Document",
+      "description": "Scan a markdown file for link text, alt text, heading order, table and emoji accessibility issues.",
+      "inputSchema": {
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "type": "object",
+        "properties": {
+          "filePath": {
+            "type": "string",
+            "description": "Absolute path to the .md file"
+          },
+          "reportPath": {
+            "description": "Optional path to write a markdown accessibility report",
+            "type": "string"
+          }
+        },
+        "required": [
+          "filePath"
+        ]
+      },
+      "outputSchema": {
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "type": "object",
+        "properties": {
+          "scope": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Files, URLs or components examined."
+          },
+          "findings": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "rule": {
+                  "type": "string",
+                  "description": "Stable rule identifier."
+                },
+                "wcag": {
+                  "type": "string",
+                  "description": "WCAG 2.2 criterion and level, or 'n/a'."
+                },
+                "severity": {
+                  "type": "string",
+                  "enum": [
+                    "critical",
+                    "serious",
+                    "moderate",
+                    "minor"
+                  ]
+                },
+                "confidence": {
+                  "type": "string",
+                  "enum": [
+                    "high",
+                    "medium",
+                    "low"
+                  ]
+                },
+                "location": {
+                  "type": "string",
+                  "description": "Where the defect is, precisely enough to open."
+                },
+                "summary": {
+                  "type": "string",
+                  "description": "One sentence naming the defect."
+                },
+                "fix": {
+                  "type": "string",
+                  "description": "What to change."
+                },
+                "evidence": {
+                  "description": "The offending markup, value or measurement.",
+                  "type": "string"
+                },
+                "component": {
+                  "description": "Component or template, when the defect repeats.",
+                  "type": "string"
+                }
+              },
+              "required": [
+                "rule",
+                "wcag",
+                "severity",
+                "location",
+                "summary",
+                "fix"
+              ],
+              "additionalProperties": false
+            },
+            "description": "One entry per defect found."
+          },
+          "passed": {
+            "description": "Checks that ran and found nothing, so 'clean' is distinguishable from 'not checked'.",
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "notes": {
+            "description": "Anything a person must decide, and anything that could not be checked.",
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "required": [
+          "scope",
+          "findings"
+        ],
+        "additionalProperties": false
+      },
+      "annotations": {
+        "title": "Scan Markdown Document",
+        "readOnlyHint": true,
+        "idempotentHint": true,
+        "openWorldHint": false
+      },
+      "_meta": {
+        "anthropic/maxResultSizeChars": 60000
+      },
+      "execution": {
+        "taskSupport": "forbidden"
+      }
+    },
+    {
+      "name": "glow_health_check",
+      "title": "GLOW Health Check",
+      "description": "Check health of a GLOW API endpoint (defaults to `https://letitglow.app/mcp`).",
+      "inputSchema": {
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "type": "object",
+        "properties": {
+          "baseUrl": {
+            "description": "Optional GLOW API base URL",
+            "type": "string"
+          },
+          "timeoutMs": {
+            "type": "integer",
+            "exclusiveMinimum": 0,
+            "maximum": 300000
+          }
+        }
+      },
+      "outputSchema": {
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "type": "object",
+        "properties": {
+          "ok": {
+            "type": "boolean",
+            "description": "Whether the operation succeeded."
+          },
+          "detail": {
+            "description": "What happened, in one sentence.",
+            "type": "string"
+          },
+          "path": {
+            "description": "A file this call wrote or read, when there is one.",
+            "type": "string"
+          },
+          "version": {
+            "description": "Version of an external tool, when relevant.",
+            "type": "string"
+          }
+        },
+        "required": [
+          "ok"
+        ],
+        "additionalProperties": false
+      },
+      "annotations": {
+        "title": "GLOW Health Check",
+        "readOnlyHint": true,
+        "idempotentHint": true,
+        "openWorldHint": true
+      },
+      "execution": {
+        "taskSupport": "forbidden"
+      }
+    },
+    {
+      "name": "glow_audit_document",
+      "title": "GLOW Audit Document",
+      "description": "Upload a document to GLOW and run accessibility audit (/audit). Supports markdown, html, and docx.",
+      "inputSchema": {
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "type": "object",
+        "properties": {
+          "filePath": {
+            "type": "string",
+            "description": "Absolute path to local file"
+          },
+          "format": {
+            "type": "string",
+            "enum": [
+              "markdown",
+              "html",
+              "docx"
+            ],
+            "description": "Document format"
+          },
+          "baseUrl": {
+            "description": "Optional GLOW API base URL",
+            "type": "string"
+          },
+          "timeoutMs": {
+            "type": "integer",
+            "exclusiveMinimum": 0,
+            "maximum": 300000
+          }
+        },
+        "required": [
+          "filePath",
+          "format"
+        ]
+      },
+      "outputSchema": {
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "type": "object",
+        "properties": {
+          "scope": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Files, URLs or components examined."
+          },
+          "findings": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "rule": {
+                  "type": "string",
+                  "description": "Stable rule identifier."
+                },
+                "wcag": {
+                  "type": "string",
+                  "description": "WCAG 2.2 criterion and level, or 'n/a'."
+                },
+                "severity": {
+                  "type": "string",
+                  "enum": [
+                    "critical",
+                    "serious",
+                    "moderate",
+                    "minor"
+                  ]
+                },
+                "confidence": {
+                  "type": "string",
+                  "enum": [
+                    "high",
+                    "medium",
+                    "low"
+                  ]
+                },
+                "location": {
+                  "type": "string",
+                  "description": "Where the defect is, precisely enough to open."
+                },
+                "summary": {
+                  "type": "string",
+                  "description": "One sentence naming the defect."
+                },
+                "fix": {
+                  "type": "string",
+                  "description": "What to change."
+                },
+                "evidence": {
+                  "description": "The offending markup, value or measurement.",
+                  "type": "string"
+                },
+                "component": {
+                  "description": "Component or template, when the defect repeats.",
+                  "type": "string"
+                }
+              },
+              "required": [
+                "rule",
+                "wcag",
+                "severity",
+                "location",
+                "summary",
+                "fix"
+              ],
+              "additionalProperties": false
+            },
+            "description": "One entry per defect found."
+          },
+          "passed": {
+            "description": "Checks that ran and found nothing, so 'clean' is distinguishable from 'not checked'.",
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "notes": {
+            "description": "Anything a person must decide, and anything that could not be checked.",
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "required": [
+          "scope",
+          "findings"
+        ],
+        "additionalProperties": false
+      },
+      "annotations": {
+        "title": "GLOW Audit Document",
+        "readOnlyHint": true,
+        "idempotentHint": true,
+        "openWorldHint": true
+      },
+      "_meta": {
+        "anthropic/maxResultSizeChars": 60000
+      },
+      "execution": {
+        "taskSupport": "forbidden"
+      }
+    },
+    {
+      "name": "glow_fix_document",
+      "title": "GLOW Fix Document",
+      "description": "Upload a document to GLOW and run auto-fix workflow (/fix). Supports markdown, html, and docx.",
+      "inputSchema": {
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "type": "object",
+        "properties": {
+          "filePath": {
+            "type": "string",
+            "description": "Absolute path to local file"
+          },
+          "format": {
+            "type": "string",
+            "enum": [
+              "markdown",
+              "html",
+              "docx"
+            ],
+            "description": "Document format"
+          },
+          "baseUrl": {
+            "description": "Optional GLOW API base URL",
+            "type": "string"
+          },
+          "timeoutMs": {
+            "type": "integer",
+            "exclusiveMinimum": 0,
+            "maximum": 300000
+          }
+        },
+        "required": [
+          "filePath",
+          "format"
+        ]
+      },
+      "outputSchema": {
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "type": "object",
+        "properties": {
+          "ok": {
+            "type": "boolean",
+            "description": "Whether the operation succeeded."
+          },
+          "detail": {
+            "description": "What happened, in one sentence.",
+            "type": "string"
+          },
+          "path": {
+            "description": "A file this call wrote or read, when there is one.",
+            "type": "string"
+          },
+          "version": {
+            "description": "Version of an external tool, when relevant.",
+            "type": "string"
+          }
+        },
+        "required": [
+          "ok"
+        ],
+        "additionalProperties": false
+      },
+      "annotations": {
+        "title": "GLOW Fix Document",
+        "readOnlyHint": false,
+        "destructiveHint": true,
+        "idempotentHint": false,
+        "openWorldHint": true
+      },
+      "execution": {
+        "taskSupport": "forbidden"
+      }
+    },
+    {
+      "name": "glow_convert_document",
+      "title": "GLOW Convert Document",
+      "description": "Upload a document to GLOW and convert format (/convert). Supports markdown, html, and docx.",
+      "inputSchema": {
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "type": "object",
+        "properties": {
+          "filePath": {
+            "type": "string",
+            "description": "Absolute path to local file"
+          },
+          "fromFormat": {
+            "type": "string",
+            "enum": [
+              "markdown",
+              "html",
+              "docx"
+            ],
+            "description": "Source format"
+          },
+          "toFormat": {
+            "type": "string",
+            "enum": [
+              "markdown",
+              "html",
+              "docx"
+            ],
+            "description": "Target format"
+          },
+          "baseUrl": {
+            "description": "Optional GLOW API base URL",
+            "type": "string"
+          },
+          "timeoutMs": {
+            "type": "integer",
+            "exclusiveMinimum": 0,
+            "maximum": 300000
+          }
+        },
+        "required": [
+          "filePath",
+          "fromFormat",
+          "toFormat"
+        ]
+      },
+      "outputSchema": {
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "type": "object",
+        "properties": {
+          "ok": {
+            "type": "boolean",
+            "description": "Whether the operation succeeded."
+          },
+          "detail": {
+            "description": "What happened, in one sentence.",
+            "type": "string"
+          },
+          "path": {
+            "description": "A file this call wrote or read, when there is one.",
+            "type": "string"
+          },
+          "version": {
+            "description": "Version of an external tool, when relevant.",
+            "type": "string"
+          }
+        },
+        "required": [
+          "ok"
+        ],
+        "additionalProperties": false
+      },
+      "annotations": {
+        "title": "GLOW Convert Document",
+        "readOnlyHint": false,
+        "destructiveHint": false,
+        "idempotentHint": false,
+        "openWorldHint": true
+      },
+      "execution": {
+        "taskSupport": "forbidden"
+      }
+    },
+    {
+      "name": "glow_generate_report",
+      "title": "GLOW Generate Report",
+      "description": "Upload a document to GLOW and generate report output (/report). Supports markdown, html, and docx.",
+      "inputSchema": {
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "type": "object",
+        "properties": {
+          "filePath": {
+            "type": "string",
+            "description": "Absolute path to local file"
+          },
+          "format": {
+            "type": "string",
+            "enum": [
+              "markdown",
+              "html",
+              "docx"
+            ],
+            "description": "Document format"
+          },
+          "reportType": {
+            "description": "Report type (default: json)",
+            "type": "string",
+            "enum": [
+              "json",
+              "text",
+              "html"
+            ]
+          },
+          "baseUrl": {
+            "description": "Optional GLOW API base URL",
+            "type": "string"
+          },
+          "timeoutMs": {
+            "type": "integer",
+            "exclusiveMinimum": 0,
+            "maximum": 300000
+          }
+        },
+        "required": [
+          "filePath",
+          "format"
+        ]
+      },
+      "outputSchema": {
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "type": "object",
+        "properties": {
+          "ok": {
+            "type": "boolean",
+            "description": "Whether the operation succeeded."
+          },
+          "detail": {
+            "description": "What happened, in one sentence.",
+            "type": "string"
+          },
+          "path": {
+            "description": "A file this call wrote or read, when there is one.",
+            "type": "string"
+          },
+          "version": {
+            "description": "Version of an external tool, when relevant.",
+            "type": "string"
+          }
+        },
+        "required": [
+          "ok"
+        ],
+        "additionalProperties": false
+      },
+      "annotations": {
+        "title": "GLOW Generate Report",
+        "readOnlyHint": true,
+        "idempotentHint": true,
+        "openWorldHint": true
+      },
+      "execution": {
+        "taskSupport": "forbidden"
+      }
+    },
+    {
+      "name": "save_audit_result",
+      "title": "Save Audit Result",
+      "description": "Save a scan result to the audit history so later runs can show a delta and compliance evidence stays in the repository.",
+      "inputSchema": {
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "web",
+              "office",
+              "pdf",
+              "epub",
+              "markdown"
+            ],
+            "description": "Type of scan that produced these results"
+          },
+          "target": {
+            "type": "string",
+            "description": "Target that was scanned (URL, file path, or folder path)"
+          },
+          "score": {
+            "description": "Overall accessibility score (0-100)",
+            "type": "number",
+            "minimum": 0,
+            "maximum": 100
+          },
+          "grade": {
+            "description": "Letter grade (A-F)",
+            "type": "string",
+            "enum": [
+              "A",
+              "B",
+              "C",
+              "D",
+              "F"
+            ]
+          },
+          "findingCount": {
+            "type": "number",
+            "description": "Total number of findings"
+          },
+          "errorCount": {
+            "description": "Number of error-severity findings",
+            "type": "number"
+          },
+          "warningCount": {
+            "description": "Number of warning-severity findings",
+            "type": "number"
+          },
+          "findings": {
+            "description": "Array of individual findings (optional, for detailed storage)",
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "ruleId": {
+                  "type": "string"
+                },
+                "severity": {
+                  "type": "string",
+                  "enum": [
+                    "critical",
+                    "serious",
+                    "moderate",
+                    "minor"
+                  ]
+                },
+                "message": {
+                  "type": "string"
+                },
+                "location": {
+                  "type": "string"
+                },
+                "wcagCriterion": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "ruleId",
+                "message"
+              ]
+            }
+          },
+          "toolVersion": {
+            "description": "Version of the scanning tool",
+            "type": "string"
+          },
+          "retention": {
+            "description": "Max audits to keep per target (default: 30)",
+            "type": "number",
+            "minimum": 1,
+            "maximum": 1000
+          }
+        },
+        "required": [
+          "type",
+          "target",
+          "findingCount"
+        ]
+      },
+      "outputSchema": {
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "type": "object",
+        "properties": {
+          "ok": {
+            "type": "boolean",
+            "description": "Whether the operation succeeded."
+          },
+          "detail": {
+            "description": "What happened, in one sentence.",
+            "type": "string"
+          },
+          "path": {
+            "description": "A file this call wrote or read, when there is one.",
+            "type": "string"
+          },
+          "version": {
+            "description": "Version of an external tool, when relevant.",
+            "type": "string"
+          }
+        },
+        "required": [
+          "ok"
+        ],
+        "additionalProperties": false
+      },
+      "annotations": {
+        "title": "Save Audit Result",
+        "readOnlyHint": false,
+        "destructiveHint": false,
+        "idempotentHint": false,
+        "openWorldHint": false
+      },
+      "execution": {
+        "taskSupport": "forbidden"
+      }
+    },
+    {
+      "name": "list_audit_history",
+      "title": "List Audit History",
+      "description": "List stored accessibility audit results from .a11y-history/. Filter by scan type, target, or date range. Returns summaries with scores and finding counts.",
+      "inputSchema": {
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "type": "object",
+        "properties": {
+          "type": {
+            "description": "Filter by scan type",
+            "type": "string",
+            "enum": [
+              "web",
+              "office",
+              "pdf",
+              "epub",
+              "markdown"
+            ]
+          },
+          "target": {
+            "description": "Filter by target (exact match on path/URL)",
+            "type": "string"
+          },
+          "limit": {
+            "description": "Max results to return (default: 20, newest first)",
+            "type": "number",
+            "minimum": 1,
+            "maximum": 100
+          }
+        }
+      },
+      "outputSchema": {
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "propertyNames": {
+                "type": "string"
+              },
+              "additionalProperties": {}
+            },
+            "description": "The records returned."
+          },
+          "total": {
+            "description": "How many records exist, when more than were returned.",
+            "type": "number"
+          }
+        },
+        "required": [
+          "items"
+        ],
+        "additionalProperties": false
+      },
+      "annotations": {
+        "title": "List Audit History",
+        "readOnlyHint": true,
+        "idempotentHint": true,
+        "openWorldHint": false
+      },
+      "execution": {
+        "taskSupport": "forbidden"
+      }
+    },
+    {
+      "name": "get_audit_result",
+      "title": "Get Audit Result",
+      "description": "Retrieve a specific stored audit result by its ID. Returns the full audit record including all findings.",
+      "inputSchema": {
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "type": "object",
+        "properties": {
+          "auditId": {
+            "type": "string",
+            "description": "Audit ID (filename without .json extension, from list_audit_history)"
+          }
+        },
+        "required": [
+          "auditId"
+        ]
+      },
+      "outputSchema": {
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "type": "object",
+        "properties": {
+          "scope": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Files, URLs or components examined."
+          },
+          "findings": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "rule": {
+                  "type": "string",
+                  "description": "Stable rule identifier."
+                },
+                "wcag": {
+                  "type": "string",
+                  "description": "WCAG 2.2 criterion and level, or 'n/a'."
+                },
+                "severity": {
+                  "type": "string",
+                  "enum": [
+                    "critical",
+                    "serious",
+                    "moderate",
+                    "minor"
+                  ]
+                },
+                "confidence": {
+                  "type": "string",
+                  "enum": [
+                    "high",
+                    "medium",
+                    "low"
+                  ]
+                },
+                "location": {
+                  "type": "string",
+                  "description": "Where the defect is, precisely enough to open."
+                },
+                "summary": {
+                  "type": "string",
+                  "description": "One sentence naming the defect."
+                },
+                "fix": {
+                  "type": "string",
+                  "description": "What to change."
+                },
+                "evidence": {
+                  "description": "The offending markup, value or measurement.",
+                  "type": "string"
+                },
+                "component": {
+                  "description": "Component or template, when the defect repeats.",
+                  "type": "string"
+                }
+              },
+              "required": [
+                "rule",
+                "wcag",
+                "severity",
+                "location",
+                "summary",
+                "fix"
+              ],
+              "additionalProperties": false
+            },
+            "description": "One entry per defect found."
+          },
+          "passed": {
+            "description": "Checks that ran and found nothing, so 'clean' is distinguishable from 'not checked'.",
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "notes": {
+            "description": "Anything a person must decide, and anything that could not be checked.",
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "required": [
+          "scope",
+          "findings"
+        ],
+        "additionalProperties": false
+      },
+      "annotations": {
+        "title": "Get Audit Result",
+        "readOnlyHint": true,
+        "idempotentHint": true,
+        "openWorldHint": false
+      },
+      "_meta": {
+        "anthropic/maxResultSizeChars": 60000
+      },
+      "execution": {
+        "taskSupport": "forbidden"
+      }
+    },
+    {
+      "name": "prune_audit_history",
+      "title": "Prune Audit History",
+      "description": "Remove old audit results beyond the retention limit for each target. Keeps the newest N audits per target and deletes the rest.",
+      "inputSchema": {
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "type": "object",
+        "properties": {
+          "retention": {
+            "description": "Max audits to keep per target (default: 30)",
+            "type": "number",
+            "minimum": 1,
+            "maximum": 1000
+          }
+        }
+      },
+      "outputSchema": {
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "type": "object",
+        "properties": {
+          "ok": {
+            "type": "boolean",
+            "description": "Whether the operation succeeded."
+          },
+          "detail": {
+            "description": "What happened, in one sentence.",
+            "type": "string"
+          },
+          "path": {
+            "description": "A file this call wrote or read, when there is one.",
+            "type": "string"
+          },
+          "version": {
+            "description": "Version of an external tool, when relevant.",
+            "type": "string"
+          }
+        },
+        "required": [
+          "ok"
+        ],
+        "additionalProperties": false
+      },
+      "annotations": {
+        "title": "Prune Audit History",
+        "readOnlyHint": false,
+        "destructiveHint": true,
+        "idempotentHint": false,
+        "openWorldHint": false
+      },
+      "execution": {
+        "taskSupport": "forbidden"
+      }
+    },
+    {
+      "name": "get_audit_trend",
+      "title": "Get Audit Score Trend",
+      "description": "Return the score history for one target, with direction, delta and finding velocity, so a trend can be reported.",
+      "inputSchema": {
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "type": "object",
+        "properties": {
+          "target": {
+            "type": "string",
+            "description": "Target to compute trend for (URL or file path)"
+          },
+          "limit": {
+            "description": "Max historical scans to include (default: 20)",
+            "type": "number",
+            "minimum": 2,
+            "maximum": 100
+          }
+        },
+        "required": [
+          "target"
+        ]
+      },
+      "outputSchema": {
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "propertyNames": {
+                "type": "string"
+              },
+              "additionalProperties": {}
+            },
+            "description": "The records returned."
+          },
+          "total": {
+            "description": "How many records exist, when more than were returned.",
+            "type": "number"
+          }
+        },
+        "required": [
+          "items"
+        ],
+        "additionalProperties": false
+      },
+      "annotations": {
+        "title": "Get Audit Score Trend",
+        "readOnlyHint": true,
+        "idempotentHint": true,
+        "openWorldHint": false
+      },
+      "execution": {
+        "taskSupport": "forbidden"
+      }
+    },
+    {
+      "name": "render_accessibility_report",
+      "title": "Render an accessibility report",
+      "description": "Render a complete audit report from findings JSON. Produces every required section, computes the score and grade, and embeds the merged findings so the next run can show a delta.",
+      "inputSchema": {
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "type": "object",
+        "properties": {
+          "findings": {
+            "minItems": 1,
+            "type": "array",
+            "items": {
+              "type": "object",
+              "propertyNames": {
+                "type": "string"
+              },
+              "additionalProperties": {}
+            },
+            "description": "Findings payloads, each matching skills/a11y-core/schemas/findings.schema.json."
+          },
+          "template": {
+            "default": "web",
+            "description": "Which report shape to render.",
+            "type": "string",
+            "enum": [
+              "web",
+              "document",
+              "markdown"
+            ]
+          },
+          "outputPath": {
+            "description": "Where to write the report. Defaults to the template's standard filename in the working directory.",
+            "type": "string"
+          }
+        },
+        "required": [
+          "findings"
+        ]
+      },
+      "outputSchema": {
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "type": "object",
+        "properties": {
+          "path": {
+            "type": "string",
+            "description": "The file written."
+          },
+          "format": {
+            "description": "The format written.",
+            "type": "string"
+          },
+          "detail": {
+            "description": "What the file contains.",
+            "type": "string"
+          }
+        },
+        "required": [
+          "path"
+        ],
+        "additionalProperties": false
+      },
+      "annotations": {
+        "title": "Render an accessibility report",
+        "readOnlyHint": false,
+        "destructiveHint": false,
+        "idempotentHint": false,
+        "openWorldHint": false
+      },
+      "execution": {
+        "taskSupport": "forbidden"
+      }
+    },
+    {
+      "name": "fix_document_metadata",
+      "title": "Fix Document Metadata",
+      "description": "Fix common metadata accessibility issues in Office documents: missing title, missing language, missing author. Returns a report of changes made.",
+      "inputSchema": {
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "type": "object",
+        "properties": {
+          "filePath": {
+            "type": "string",
+            "description": "Absolute path to the document (.docx, .xlsx, .pptx)"
+          },
+          "title": {
+            "description": "Document title to set",
+            "type": "string"
+          },
+          "language": {
+            "description": "Document language to set (BCP 47 tag, e.g. \"en-US\")",
+            "type": "string"
+          },
+          "author": {
+            "description": "Document author to set",
+            "type": "string"
+          }
+        },
+        "required": [
+          "filePath"
+        ]
+      },
+      "outputSchema": {
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "type": "object",
+        "properties": {
+          "ok": {
+            "type": "boolean",
+            "description": "Whether the operation succeeded."
+          },
+          "detail": {
+            "description": "What happened, in one sentence.",
+            "type": "string"
+          },
+          "path": {
+            "description": "A file this call wrote or read, when there is one.",
+            "type": "string"
+          },
+          "version": {
+            "description": "Version of an external tool, when relevant.",
+            "type": "string"
+          }
+        },
+        "required": [
+          "ok"
+        ],
+        "additionalProperties": false
+      },
+      "annotations": {
+        "title": "Fix Document Metadata",
+        "readOnlyHint": false,
+        "destructiveHint": true,
+        "idempotentHint": false,
+        "openWorldHint": false
+      },
+      "execution": {
+        "taskSupport": "forbidden"
+      }
+    },
+    {
+      "name": "fix_document_headings",
+      "title": "Fix Document Headings",
+      "description": "Analyze and report heading structure issues in Office documents with fix instructions. Detects skipped levels, missing Heading 1, visual-only formatting, and provides remediation steps.",
+      "inputSchema": {
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "type": "object",
+        "properties": {
+          "filePath": {
+            "type": "string",
+            "description": "Absolute path to the document (.docx)"
+          }
+        },
+        "required": [
+          "filePath"
+        ]
+      },
+      "outputSchema": {
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "type": "object",
+        "properties": {
+          "ok": {
+            "type": "boolean",
+            "description": "Whether the operation succeeded."
+          },
+          "detail": {
+            "description": "What happened, in one sentence.",
+            "type": "string"
+          },
+          "path": {
+            "description": "A file this call wrote or read, when there is one.",
+            "type": "string"
+          },
+          "version": {
+            "description": "Version of an external tool, when relevant.",
+            "type": "string"
+          }
+        },
+        "required": [
+          "ok"
+        ],
+        "additionalProperties": false
+      },
+      "annotations": {
+        "title": "Fix Document Headings",
+        "readOnlyHint": false,
+        "destructiveHint": true,
+        "idempotentHint": false,
+        "openWorldHint": false
+      },
+      "execution": {
+        "taskSupport": "forbidden"
+      }
+    },
+    {
+      "name": "check_audit_cache",
+      "title": "Check Audit Cache",
+      "description": "Check whether a cached audit result exists and is still fresh for this target.",
+      "inputSchema": {
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "type": "object",
+        "properties": {
+          "filePaths": {
+            "maxItems": 50,
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Array of file paths to check against the cache"
+          },
+          "cacheFile": {
+            "description": "Path to cache file (default: .a11y-cache.json in project root)",
+            "type": "string"
+          },
+          "useContentHash": {
+            "description": "Use SHA-256 content hash instead of size+mtime (more reliable but slower). Default: false",
+            "type": "boolean"
+          },
+          "maxAgeDays": {
+            "description": "Treat entries older than this many days as expired and needing re-scan. Default: no expiry",
+            "type": "number"
+          }
+        },
+        "required": [
+          "filePaths"
+        ]
+      },
+      "outputSchema": {
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "type": "object",
+        "properties": {
+          "ok": {
+            "type": "boolean",
+            "description": "Whether the operation succeeded."
+          },
+          "detail": {
+            "description": "What happened, in one sentence.",
+            "type": "string"
+          },
+          "path": {
+            "description": "A file this call wrote or read, when there is one.",
+            "type": "string"
+          },
+          "version": {
+            "description": "Version of an external tool, when relevant.",
+            "type": "string"
+          }
+        },
+        "required": [
+          "ok"
+        ],
+        "additionalProperties": false
+      },
+      "annotations": {
+        "title": "Check Audit Cache",
+        "readOnlyHint": true,
+        "idempotentHint": true,
+        "openWorldHint": false
+      },
+      "execution": {
+        "taskSupport": "forbidden"
+      }
+    },
+    {
+      "name": "update_audit_cache",
+      "title": "Update Audit Cache",
+      "description": "Update the component audit cache (.a11y-cache.json) after scanning files. Stores file hashes, finding counts, severity breakdown, and scan timestamp so unchanged files can be skipped on re-audit.",
+      "inputSchema": {
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "type": "object",
+        "properties": {
+          "entries": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "filePath": {
+                  "type": "string",
+                  "description": "Absolute path to the scanned file"
+                },
+                "findingCount": {
+                  "type": "number",
+                  "description": "Number of accessibility findings in this file"
+                },
+                "errorCount": {
+                  "description": "Number of error-severity findings",
+                  "type": "number"
+                },
+                "warningCount": {
+                  "description": "Number of warning-severity findings",
+                  "type": "number"
+                }
+              },
+              "required": [
+                "filePath",
+                "findingCount"
+              ]
+            },
+            "description": "Array of scan results to cache"
+          },
+          "cacheFile": {
+            "description": "Path to cache file (default: .a11y-cache.json in project root)",
+            "type": "string"
+          },
+          "useContentHash": {
+            "description": "Use SHA-256 content hash instead of size+mtime. Default: false",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "entries"
+        ]
+      },
+      "outputSchema": {
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "type": "object",
+        "properties": {
+          "ok": {
+            "type": "boolean",
+            "description": "Whether the operation succeeded."
+          },
+          "detail": {
+            "description": "What happened, in one sentence.",
+            "type": "string"
+          },
+          "path": {
+            "description": "A file this call wrote or read, when there is one.",
+            "type": "string"
+          },
+          "version": {
+            "description": "Version of an external tool, when relevant.",
+            "type": "string"
+          }
+        },
+        "required": [
+          "ok"
+        ],
+        "additionalProperties": false
+      },
+      "annotations": {
+        "title": "Update Audit Cache",
+        "readOnlyHint": false,
+        "destructiveHint": false,
+        "idempotentHint": false,
+        "openWorldHint": false
+      },
+      "execution": {
+        "taskSupport": "forbidden"
+      }
+    },
+    {
+      "name": "check_color_blindness",
+      "title": "Check Color Blindness",
+      "description": "Simulate how a color pair looks under different types of color vision deficiency (protanopia, deuteranopia, tritanopia, achromatopsia). Returns simulated colors and whether distinction is maintained.",
+      "inputSchema": {
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "type": "object",
+        "properties": {
+          "colors": {
+            "minItems": 2,
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Array of hex colors to compare (e.g. ['#FF0000', '#00FF00'])"
+          }
+        },
+        "required": [
+          "colors"
+        ]
+      },
+      "outputSchema": {
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "type": "object",
+        "properties": {
+          "value": {
+            "description": "The measured value.",
+            "type": "number"
+          },
+          "unit": {
+            "description": "What the value is measured in.",
+            "type": "string"
+          },
+          "threshold": {
+            "description": "The value required to pass.",
+            "type": "number"
+          },
+          "passes": {
+            "type": "boolean",
+            "description": "Whether the measurement meets the threshold."
+          },
+          "level": {
+            "description": "The conformance level this result is judged against.",
+            "type": "string"
+          },
+          "detail": {
+            "description": "A short explanation of the result.",
+            "type": "string"
+          }
+        },
+        "required": [
+          "passes"
+        ],
+        "additionalProperties": false
+      },
+      "annotations": {
+        "title": "Check Color Blindness",
+        "readOnlyHint": true,
+        "idempotentHint": true,
+        "openWorldHint": false
+      },
+      "execution": {
+        "taskSupport": "forbidden"
+      }
+    },
+    {
+      "name": "check_reading_level",
+      "title": "Check Reading Level",
+      "description": "Estimate the reading level of a passage and report whether it meets the requested grade.",
+      "inputSchema": {
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "type": "object",
+        "properties": {
+          "text": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 50000,
+            "description": "Text content to analyze"
+          }
+        },
+        "required": [
+          "text"
+        ]
+      },
+      "outputSchema": {
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "type": "object",
+        "properties": {
+          "value": {
+            "description": "The measured value.",
+            "type": "number"
+          },
+          "unit": {
+            "description": "What the value is measured in.",
+            "type": "string"
+          },
+          "threshold": {
+            "description": "The value required to pass.",
+            "type": "number"
+          },
+          "passes": {
+            "type": "boolean",
+            "description": "Whether the measurement meets the threshold."
+          },
+          "level": {
+            "description": "The conformance level this result is judged against.",
+            "type": "string"
+          },
+          "detail": {
+            "description": "A short explanation of the result.",
+            "type": "string"
+          }
+        },
+        "required": [
+          "passes"
+        ],
+        "additionalProperties": false
+      },
+      "annotations": {
+        "title": "Check Reading Level",
+        "readOnlyHint": true,
+        "idempotentHint": true,
+        "openWorldHint": false
+      },
+      "execution": {
+        "taskSupport": "forbidden"
+      }
+    },
+    {
+      "name": "validate_caption_file",
+      "title": "Validate Caption File",
+      "description": "Validate a WebVTT or SRT caption file for syntax errors, timing overlaps, excessive caption rate, and missing speaker identification. Helps ensure media accessibility compliance (WCAG 1.2.2, 1.2.4).",
+      "inputSchema": {
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "type": "object",
+        "properties": {
+          "filePath": {
+            "type": "string",
+            "description": "Absolute path to the .vtt or .srt caption file"
+          }
+        },
+        "required": [
+          "filePath"
+        ]
+      },
+      "outputSchema": {
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "type": "object",
+        "properties": {
+          "scope": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Files, URLs or components examined."
+          },
+          "findings": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "rule": {
+                  "type": "string",
+                  "description": "Stable rule identifier."
+                },
+                "wcag": {
+                  "type": "string",
+                  "description": "WCAG 2.2 criterion and level, or 'n/a'."
+                },
+                "severity": {
+                  "type": "string",
+                  "enum": [
+                    "critical",
+                    "serious",
+                    "moderate",
+                    "minor"
+                  ]
+                },
+                "confidence": {
+                  "type": "string",
+                  "enum": [
+                    "high",
+                    "medium",
+                    "low"
+                  ]
+                },
+                "location": {
+                  "type": "string",
+                  "description": "Where the defect is, precisely enough to open."
+                },
+                "summary": {
+                  "type": "string",
+                  "description": "One sentence naming the defect."
+                },
+                "fix": {
+                  "type": "string",
+                  "description": "What to change."
+                },
+                "evidence": {
+                  "description": "The offending markup, value or measurement.",
+                  "type": "string"
+                },
+                "component": {
+                  "description": "Component or template, when the defect repeats.",
+                  "type": "string"
+                }
+              },
+              "required": [
+                "rule",
+                "wcag",
+                "severity",
+                "location",
+                "summary",
+                "fix"
+              ],
+              "additionalProperties": false
+            },
+            "description": "One entry per defect found."
+          },
+          "passed": {
+            "description": "Checks that ran and found nothing, so 'clean' is distinguishable from 'not checked'.",
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "notes": {
+            "description": "Anything a person must decide, and anything that could not be checked.",
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "required": [
+          "scope",
+          "findings"
+        ],
+        "additionalProperties": false
+      },
+      "annotations": {
+        "title": "Validate Caption File",
+        "readOnlyHint": true,
+        "idempotentHint": true,
+        "openWorldHint": false
+      },
+      "execution": {
+        "taskSupport": "forbidden"
+      }
+    },
+    {
+      "name": "generate_accessibility_statement",
+      "title": "Generate Accessibility Statement",
+      "description": "Generate a W3C or EU model accessibility statement from provided information. Outputs a Markdown document ready for publishing.",
+      "inputSchema": {
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "type": "object",
+        "properties": {
+          "organization": {
+            "type": "string",
+            "description": "Organization name"
+          },
+          "websiteUrl": {
+            "type": "string",
+            "description": "Website URL covered by the statement"
+          },
+          "contactEmail": {
+            "type": "string",
+            "description": "Accessibility feedback contact email"
+          },
+          "conformanceLevel": {
+            "description": "Target WCAG level (default: AA)",
+            "type": "string",
+            "enum": [
+              "A",
+              "AA",
+              "AAA"
+            ]
+          },
+          "conformanceStatus": {
+            "type": "string",
+            "enum": [
+              "fully",
+              "partially",
+              "non-conformant"
+            ],
+            "description": "Overall conformance status"
+          },
+          "format": {
+            "description": "Statement format: w3c (default) or eu",
+            "type": "string",
+            "enum": [
+              "w3c",
+              "eu"
+            ]
+          },
+          "assessmentDate": {
+            "description": "Date of last assessment (ISO format)",
+            "type": "string"
+          },
+          "assessmentMethod": {
+            "description": "How the assessment was conducted",
+            "type": "string"
+          },
+          "knownLimitations": {
+            "description": "Known accessibility limitations",
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "description": {
+                  "type": "string"
+                },
+                "wcag": {
+                  "type": "string"
+                },
+                "workaround": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "description"
+              ]
+            }
+          },
+          "technologies": {
+            "description": "Technologies relied upon (e.g. HTML5, CSS3, WAI-ARIA)",
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "compatibleWith": {
+            "description": "Browsers and assistive technologies tested",
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "required": [
+          "organization",
+          "websiteUrl",
+          "contactEmail",
+          "conformanceStatus"
+        ]
+      },
+      "outputSchema": {
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "type": "object",
+        "properties": {
+          "ok": {
+            "type": "boolean",
+            "description": "Whether the operation succeeded."
+          },
+          "detail": {
+            "description": "What happened, in one sentence.",
+            "type": "string"
+          },
+          "path": {
+            "description": "A file this call wrote or read, when there is one.",
+            "type": "string"
+          },
+          "version": {
+            "description": "Version of an external tool, when relevant.",
+            "type": "string"
+          }
+        },
+        "required": [
+          "ok"
+        ],
+        "additionalProperties": false
+      },
+      "annotations": {
+        "title": "Generate Accessibility Statement",
+        "readOnlyHint": false,
+        "destructiveHint": false,
+        "idempotentHint": false,
+        "openWorldHint": false
+      },
+      "execution": {
+        "taskSupport": "forbidden"
+      }
+    }
+  ]
+}

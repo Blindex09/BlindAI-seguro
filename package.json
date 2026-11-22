@@ -1,0 +1,63 @@
+{
+  "name": "blind-ai",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Casca Electron do Blind AI. Supervisiona o backend Python e mostra a interface.",
+  "author": "Blind AI",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "dev": "electron . --dev",
+    "lint": "node scripts/check-syntax.js",
+    "test": "node scripts/smoke.js",
+    "test:electron": "node scripts/smoke.js --electron",
+    "test:e2e": "node scripts/e2e-renderer.js",
+    "pack": "electron-builder --dir",
+    "dist": "electron-builder"
+  },
+  "devDependencies": {
+    "electron": "^33.2.0",
+    "electron-builder": "^25.1.8"
+  },
+  "build": {
+    "appId": "ai.blind.desktop",
+    "productName": "Blind AI",
+    "directories": {
+      "output": "dist"
+    },
+    "files": [
+      "main.js",
+      "preload.js",
+      "package.json",
+      "src/**/*"
+    ],
+    "extraResources": [
+      {
+        "from": "backend",
+        "to": "backend",
+        "filter": [
+          "**/*",
+          "!**/__pycache__/**",
+          "!**/*.pyc",
+          "!**/.env",
+          "!**/*.db",
+          "!**/*.db-journal",
+          "!**/*.db-wal",
+          "!**/*.db-shm",
+          "!tests/**",
+          "!.pytest_cache/**",
+          "!.pytest-cache/**",
+          "!.aider*"
+        ]
+      }
+    ],
+    "win": {
+      "target": "nsis",
+      "signAndEditExecutable": false
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true
+    }
+  }
+}

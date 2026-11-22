@@ -1,0 +1,51 @@
+node_modules/
+dist/
+out/
+.env
+backend/.env
+backend/**/__pycache__/
+backend/.pytest_cache/
+backend/.pytest-cache/
+backend/*.db
+backend/data/
+
+# --- adicionado na auditoria de publicacao ---
+# bancos locais (conversas, sessoes, canais) e seus arquivos auxiliares
+*.db
+*.db-journal
+*.db-wal
+*.db-shm
+*.sqlite
+*.sqlite3
+# configuracao e segredos locais; so o .env.example e versionado
+.env
+.env.*
+!.env.example
+backend/.env.*
+!backend/.env.example
+# configuracao do cliente MCP desta maquina (caminhos absolutos); o modelo versionado e o backend/mcp.json
+/.mcp.json
+.claude/settings.local.json
+.claude/worktrees/
+# historicos de ferramentas, registros e arquivos de teste soltos
+.aider*
+@AutomationLog.txt
+nota_teste_e2e.txt*
+*.bak
+*.log
+# Python e testes
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.pytest-cache/
+.venv/
+venv/
+# sistema
+.DS_Store
+Thumbs.db
+
+# programa de terceiros de 253 MB (acima do limite de 100 MB do GitHub): instale pelo caminho oficial
+backend/bin/*.exe
+
+# gerado por scripts/gerar-mcp-claude.py a partir de backend/mcp.json (caminhos absolutos desta maquina)
+/canal-claude/.mcp.json

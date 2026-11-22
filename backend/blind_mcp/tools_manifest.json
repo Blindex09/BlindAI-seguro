@@ -1,0 +1,167 @@
+{
+  "proprios": {
+    "blind": [
+      "comecar"
+    ],
+    "agent-desktop": [
+      "click",
+      "clipboard",
+      "close_app",
+      "descrever_janela",
+      "double_click",
+      "element_action",
+      "find",
+      "get_property",
+      "hover",
+      "launch_app",
+      "list_apps",
+      "list_tray",
+      "list_windows",
+      "notifications",
+      "press_keys",
+      "screen_context",
+      "screenshot",
+      "scroll",
+      "snapshot",
+      "status",
+      "type_text",
+      "wait_for",
+      "window_action"
+    ],
+    "blind-speech": [
+      "list_voices",
+      "speak",
+      "stop_speaking"
+    ],
+    "blind-docs": [
+      "describe_image",
+      "document_outline",
+      "documento_acessibilidade",
+      "pdf_fill",
+      "pdf_forms",
+      "pdf_merge_split",
+      "read_document",
+      "ver_imagem",
+      "web_read",
+      "web_search",
+      "writer_draft",
+      "writer_save"
+    ],
+    "blind-channels": [
+      "canais_configurar",
+      "canais_vincular_telegram",
+      "canal_enviar_arquivo",
+      "canal_proxima",
+      "canal_responder",
+      "channel_describe_image",
+      "channel_transcribe_audio",
+      "contato_listar",
+      "contato_remover",
+      "contato_salvar",
+      "google_fila_proxima",
+      "google_fila_responder",
+      "google_pedir",
+      "telegram_connect",
+      "telegram_messages",
+      "telegram_send",
+      "telegram_status",
+      "whatsapp_contatos",
+      "whatsapp_messages",
+      "whatsapp_pair",
+      "whatsapp_send",
+      "whatsapp_status"
+    ],
+    "blind-memory": [
+      "cofre_apagar",
+      "cofre_copiar",
+      "cofre_falar",
+      "cofre_guardar",
+      "cofre_listar",
+      "falar_em_segredo",
+      "memory_forget",
+      "memory_recall",
+      "memory_save",
+      "session_search"
+    ],
+    "blind-schedule": [
+      "blindschedule_create",
+      "blindschedule_delete",
+      "blindschedule_list",
+      "blindschedule_snooze"
+    ],
+    "blind-system": [
+      "acoes_recentes",
+      "saude_teclado",
+      "trabalho_nao_salvo",
+      "vigia_configurar",
+      "vigia_status"
+    ],
+    "blind-stt": [
+      "prepare",
+      "stt_status",
+      "transcribe"
+    ],
+    "blind-mail": [
+      "gmail_anexo_baixar",
+      "gmail_buscar",
+      "gmail_enviar",
+      "gmail_ler",
+      "google_conectar",
+      "google_status"
+    ],
+    "blind-drive": [
+      "drive_baixar",
+      "drive_enviar",
+      "drive_listar",
+      "drive_status"
+    ]
+  },
+  "terceiros_referencia": {
+    "windows": [
+      "App",
+      "Click",
+      "Clipboard",
+      "ControlStatus",
+      "DisplayInventory",
+      "FileSystem",
+      "Move",
+      "Notification",
+      "PowerShell",
+      "Process",
+      "Registry",
+      "Scrape",
+      "Screenshot",
+      "Scroll",
+      "Snapshot",
+      "Wait",
+      "WaitFor"
+    ],
+    "blind-commander": [
+      "create_directory",
+      "edit_block",
+      "force_terminate",
+      "get_config",
+      "get_file_info",
+      "get_more_search_results",
+      "get_recent_tool_calls",
+      "get_usage_stats",
+      "give_feedback_to_desktop_commander",
+      "interact_with_process",
+      "kill_process",
+      "list_directory",
+      "list_processes",
+      "list_searches",
+      "list_sessions",
+      "move_file",
+      "read_file",
+      "read_multiple_files",
+      "read_process_output",
+      "set_config_value",
+      "start_process",
+      "start_search",
+      "stop_search",
+      "write_file",
+      "write_pdf"
+    ]
+  }
+}

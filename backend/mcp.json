@@ -1,0 +1,213 @@
+{
+  "mcpServers": {
+    "blind": {
+      "description": "Porta de entrada para o Claude: 'blind' -> comecar devolve o guia de ferramentas e regras. So Claude; o app Electron nao inicia.",
+      "clientOnly": "claude",
+      "command": "${PYTHON}",
+      "args": [
+        "-m",
+        "blind_mcp.servers.blind"
+      ],
+      "cwd": "${BACKEND_DIR}",
+      "env": {
+        "PYTHONUTF8": "1"
+      }
+    },
+    "windows": {
+      "description": "Windows-MCP (CursorTouch): captura, apps, processos, arquivos, PowerShell, Registro e MOUSE (Click, Move, Scroll, ativados em 17/11/2026 so com a protecao do guarda). SEM teclado: Type, Shortcut, MultiEdit e MultiSelect continuam excluidos. WINDOWS_MCP_CONTROL=false: sem os ganchos globais que travaram o teclado (3 vezes, 16/11/2026).",
+      "command": "uv",
+      "args": [
+        "run",
+        "--directory",
+        "${REPOS_DIR}/Windows-MCP",
+        "windows-mcp",
+        "serve"
+      ],
+      "env": {
+        "ANONYMIZED_TELEMETRY": "false",
+        "WINDOWS_MCP_CONTROL": "false",
+        "WINDOWS_MCP_EXCLUDE_TOOLS": "Type,Shortcut,MultiEdit,MultiSelect"
+      },
+      "startupTimeout": 180,
+      "callTimeout": 60,
+      "lazy": true
+    },
+    "agent-desktop": {
+      "description": "agent-desktop (Vercel Labs) + UIA: arvore de acessibilidade com @ref, janelas, bandeja e acoes no desktop.",
+      "command": "${PYTHON}",
+      "args": [
+        "-m",
+        "blind_mcp.servers.agent_desktop"
+      ],
+      "cwd": "${BACKEND_DIR}",
+      "env": {
+        "PYTHONUTF8": "1"
+      },
+      "callTimeout": 75,
+      "lazy": true
+    },
+    "blind-speech": {
+      "description": "Fala offline pelo Windows SAPI.",
+      "command": "${PYTHON}",
+      "args": [
+        "-m",
+        "blind_mcp.servers.speech"
+      ],
+      "cwd": "${BACKEND_DIR}",
+      "env": {
+        "PYTHONUTF8": "1"
+      },
+      "lazy": true
+    },
+    "blind-docs": {
+      "description": "Documentos acessiveis (PDF digital e escaneado com OCR/visao, formularios PDF), audiodescricao de imagem, escrita assistida e leitura/busca limpa da web.",
+      "command": "${PYTHON}",
+      "args": [
+        "-m",
+        "blind_mcp.servers.docs"
+      ],
+      "cwd": "${BACKEND_DIR}",
+      "env": {
+        "PYTHONUTF8": "1"
+      },
+      "callTimeout": 120,
+      "lazy": true
+    },
+    "blind-stt": {
+      "description": "Ditado e comandos por voz: transcricao local com Whisper (faster-whisper).",
+      "command": "${PYTHON}",
+      "args": [
+        "-m",
+        "blind_mcp.servers.stt"
+      ],
+      "cwd": "${BACKEND_DIR}",
+      "env": {
+        "PYTHONUTF8": "1"
+      },
+      "callTimeout": 900,
+      "modelHiddenTools": [
+        "transcribe",
+        "prepare",
+        "stt_status"
+      ]
+    },
+    "blind-channels": {
+      "description": "WhatsApp (pareamento por codigo) e Telegram, com audiodescricao de fotos recebidas e transcricao de audios.",
+      "command": "${PYTHON}",
+      "args": [
+        "-m",
+        "blind_mcp.servers.channels"
+      ],
+      "cwd": "${BACKEND_DIR}",
+      "env": {
+        "PYTHONUTF8": "1"
+      },
+      "modelHiddenTools": [
+        "telegram_connect"
+      ],
+      "lazy": true,
+      "lazyIdleSeconds": 0
+    },
+    "blind-memory": {
+      "description": "Memoria pessoal persistente, busca no historico de conversas e cofre de segredos.",
+      "command": "${PYTHON}",
+      "args": [
+        "-m",
+        "blind_mcp.servers.memory"
+      ],
+      "cwd": "${BACKEND_DIR}",
+      "env": {
+        "PYTHONUTF8": "1"
+      }
+    },
+    "blind-schedule": {
+      "description": "Agendamento do Blind: tarefas e lembretes falados (blindschedule_create, blindschedule_list, blindschedule_snooze, blindschedule_delete).",
+      "command": "${PYTHON}",
+      "args": [
+        "-m",
+        "blind_mcp.servers.schedule"
+      ],
+      "cwd": "${BACKEND_DIR}",
+      "env": {
+        "PYTHONUTF8": "1"
+      }
+    },
+    "blind-system": {
+      "description": "Diagnostico somente leitura: diario de acoes do Blind, saude do teclado e deteccao de trabalho nao salvo. Nao aperta teclas nem muda nada.",
+      "command": "${PYTHON}",
+      "args": [
+        "-m",
+        "blind_mcp.servers.system"
+      ],
+      "cwd": "${BACKEND_DIR}",
+      "env": {
+        "PYTHONUTF8": "1"
+      }
+    },
+    "blind-mail": {
+      "description": "DESLIGADO (17/11/2026): o Blind usa os conectores de Gmail/Drive do Claude. Blind Mail (so Claude): Gmail. Ler/buscar e-mails, baixar anexos; enviar (com anexos do PC) so em duas etapas, com o sim da pessoa. Nunca apaga. Precisa de client_secret.json (GOOGLE.md). O app Electron nao inicia.",
+      "clientOnly": "claude",
+      "command": "${PYTHON}",
+      "args": [
+        "-m",
+        "blind_mcp.servers.mail"
+      ],
+      "cwd": "${BACKEND_DIR}",
+      "env": {
+        "PYTHONUTF8": "1"
+      },
+      "callTimeout": 360,
+      "enabled": false
+    },
+    "blind-drive": {
+      "description": "DESLIGADO (17/11/2026): o Blind usa os conectores de Gmail/Drive do Claude. Blind Drive (so Claude): Google Drive. Listar, buscar e baixar; subir arquivo do PC so em duas etapas, com o sim da pessoa. Nunca apaga nem substitui. O app Electron nao inicia.",
+      "clientOnly": "claude",
+      "command": "${PYTHON}",
+      "args": [
+        "-m",
+        "blind_mcp.servers.drive"
+      ],
+      "cwd": "${BACKEND_DIR}",
+      "env": {
+        "PYTHONUTF8": "1"
+      },
+      "callTimeout": 360,
+      "enabled": false
+    },
+    "blind-commander": {
+      "description": "Blind Commander (Desktop Commander, wonderwhy-er, MIT, versao fixa 0.3.3): terminal, arquivos, edicao e processos. NAO controla teclado nem mouse.",
+      "command": "cmd",
+      "args": [
+        "/c",
+        "npx",
+        "-y",
+        "@wonderwhy-er/desktop-commander@0.3.3"
+      ],
+      "env": {},
+      "startupTimeout": 180,
+      "callTimeout": 120,
+      "lazy": true
+    },
+    "blind-a11y": {
+      "description": "Community-Access/accessibility-agents-mcp 7.1.0 (MIT, versao fixa, instalado em backend/vendor/a11y-mcp com Playwright 1.64.1, axe-core 4.14.0, pdf-lib 1.17.1 e Chromium; veraPDF 1.30.4 em %USERPROFILE%\u000beraPDF): 39 scanners locais de acessibilidade (axe-core, Office, PDF, ePub, markdown, contraste, teclado, PDF/UA). As ferramentas glow_* ficam DESLIGADAS: enviam arquivos para letitglow.app (servico externo); GLOW_API_BASE_URL aponta para um endereco local morto como segunda trava. Instalado em 17/11/2026 a pedido do usuario.",
+      "command": "node",
+      "args": [
+        "${BACKEND_DIR}/vendor/a11y-mcp/node_modules/@community-access/accessibility-agents-mcp/dist/stdio.mjs"
+      ],
+      "env": {
+        "GLOW_API_BASE_URL": "http://127.0.0.1:9/mcp",
+        "PATH": "${USERPROFILE}\u000beraPDF;${PATH}"
+      },
+      "disabledTools": [
+        "glow_health_check",
+        "glow_audit_document",
+        "glow_fix_document",
+        "glow_convert_document",
+        "glow_generate_report"
+      ],
+      "startupTimeout": 180,
+      "callTimeout": 120,
+      "lazy": true
+    }
+  }
+}

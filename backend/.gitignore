@@ -1,0 +1,11 @@
+.aider*
+
+*.db
+*.bak
+minuta_teste.txt
+@AutomationLog.txt
+nota_teste_e2e.txt
+nota_teste_e2e.txt.bak
+data/remote_token.txt
+*.tmp
+.env

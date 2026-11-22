@@ -1,0 +1,874 @@
+{
+  "server": "blind-channels",
+  "instructions": null,
+  "tools": [
+    {
+      "name": "whatsapp_pair",
+      "description": "Pareia o WhatsApp da pessoa pelo conector real (Baileys): devolve o codigo de 8 caracteres que o PROPRIO WhatsApp gerou\n(vale poucos minutos) e como digita-lo no celular (Aparelhos Conectados > Conectar com numero de telefone). So chame se a\npessoa pedir e der o numero com DDD. Se o conector nao estiver instalado, devolve erro e NAO gera codigo.",
+      "inputSchema": {
+        "properties": {
+          "phone": {
+            "title": "Phone",
+            "type": "string"
+          }
+        },
+        "required": [
+          "phone"
+        ],
+        "title": "whatsapp_pairArguments",
+        "type": "object"
+      },
+      "outputSchema": {
+        "properties": {
+          "result": {
+            "additionalProperties": true,
+            "title": "Result",
+            "type": "object"
+          }
+        },
+        "required": [
+          "result"
+        ],
+        "title": "whatsapp_pairOutput",
+        "type": "object"
+      }
+    },
+    {
+      "name": "whatsapp_status",
+      "description": "Consulta o estado da conexao do WhatsApp. Sem `phone`, lista todos os numeros conectados ou em pareamento\n(sem mostrar codigos). Com `phone`, mostra o estado desse numero.",
+      "inputSchema": {
+        "properties": {
+          "phone": {
+            "default": "",
+            "title": "Phone",
+            "type": "string"
+          }
+        },
+        "title": "whatsapp_statusArguments",
+        "type": "object"
+      },
+      "outputSchema": {
+        "properties": {
+          "result": {
+            "additionalProperties": true,
+            "title": "Result",
+            "type": "object"
+          }
+        },
+        "required": [
+          "result"
+        ],
+        "title": "whatsapp_statusOutput",
+        "type": "object"
+      }
+    },
+    {
+      "name": "whatsapp_messages",
+      "description": "Lista as mensagens de WhatsApp recebidas desde que o conector ligou (mais novas primeiro): de quem, nome, texto, tipo\n(texto, audio, imagem, video, documento) e o arquivo baixado. Para a pessoa cega entender a conversa, por padrao as\nmidias mais recentes (ate max_midias) ja voltam entendidas: audio e video com `transcricao` (o que foi falado), foto e\nvideo com `descricao` (audiodescricao). Midia alem do limite volta sem isso: diga que ha mais e ofereca. Use\nentender_midias=false so se a pessoa pedir so os textos. So le; nao responde nem marca como lida. Nao traz mensagens\nantigas, so as que chegam depois do conector ligar. Exige o WhatsApp pareado.",
+      "inputSchema": {
+        "properties": {
+          "limit": {
+            "default": 20,
+            "title": "Limit",
+            "type": "integer"
+          },
+          "entender_midias": {
+            "default": true,
+            "title": "Entender Midias",
+            "type": "boolean"
+          },
+          "max_midias": {
+            "default": 6,
+            "title": "Max Midias",
+            "type": "integer"
+          }
+        },
+        "title": "whatsapp_messagesArguments",
+        "type": "object"
+      },
+      "outputSchema": {
+        "properties": {
+          "result": {
+            "additionalProperties": true,
+            "title": "Result",
+            "type": "object"
+          }
+        },
+        "required": [
+          "result"
+        ],
+        "title": "whatsapp_messagesOutput",
+        "type": "object"
+      }
+    },
+    {
+      "name": "telegram_connect",
+      "description": "Valida o token do BotFather e conecta o bot ao Telegram.",
+      "inputSchema": {
+        "properties": {
+          "bot_token": {
+            "title": "Bot Token",
+            "type": "string"
+          }
+        },
+        "required": [
+          "bot_token"
+        ],
+        "title": "telegram_connectArguments",
+        "type": "object"
+      },
+      "outputSchema": {
+        "properties": {
+          "result": {
+            "additionalProperties": true,
+            "title": "Result",
+            "type": "object"
+          }
+        },
+        "required": [
+          "result"
+        ],
+        "title": "telegram_connectOutput",
+        "type": "object"
+      }
+    },
+    {
+      "name": "telegram_status",
+      "description": "Lista os bots do Telegram conectados.",
+      "inputSchema": {
+        "properties": {},
+        "title": "telegram_statusArguments",
+        "type": "object"
+      },
+      "outputSchema": {
+        "properties": {
+          "result": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "title": "Result",
+            "type": "array"
+          }
+        },
+        "required": [
+          "result"
+        ],
+        "title": "telegram_statusOutput",
+        "type": "object"
+      }
+    },
+    {
+      "name": "telegram_messages",
+      "description": "Lista as mensagens recentes recebidas ou enviadas no Telegram (incluindo fotos e audios com file_id).",
+      "inputSchema": {
+        "properties": {
+          "chat_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Chat Id"
+          },
+          "direction": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Direction"
+          },
+          "limit": {
+            "default": 20,
+            "title": "Limit",
+            "type": "integer"
+          }
+        },
+        "title": "telegram_messagesArguments",
+        "type": "object"
+      },
+      "outputSchema": {
+        "properties": {
+          "result": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "title": "Result",
+            "type": "array"
+          }
+        },
+        "required": [
+          "result"
+        ],
+        "title": "telegram_messagesOutput",
+        "type": "object"
+      }
+    },
+    {
+      "name": "canais_vincular_telegram",
+      "description": "Gera o codigo de 6 digitos para a pessoa vincular o chat dela ao bot do Telegram (vale 10 min, uso unico). Ela envia\n`/vincular CODIGO` ao bot e, a partir dai, o Blind responde so a ela naquele chat. So chame se a pessoa pedir.",
+      "inputSchema": {
+        "properties": {},
+        "title": "canais_vincular_telegramArguments",
+        "type": "object"
+      },
+      "outputSchema": {
+        "properties": {
+          "result": {
+            "additionalProperties": true,
+            "title": "Result",
+            "type": "object"
+          }
+        },
+        "required": [
+          "result"
+        ],
+        "title": "canais_vincular_telegramOutput",
+        "type": "object"
+      }
+    },
+    {
+      "name": "google_pedir",
+      "description": "Passa um pedido de Calendar, Drive ou Gmail a sessao do Google (o Blind nao tem esses conectores). A resposta chega depois,\nsozinha, pelo canal de origem. `canal` e 'telegram' ou 'whatsapp' e `destino` o que a mensagem de contexto informou. Descreva o\npedido completo e sem segredos. Enviar e-mail ou convite so com o sim da pessoa.",
+      "inputSchema": {
+        "properties": {
+          "pedido": {
+            "title": "Pedido",
+            "type": "string"
+          },
+          "canal": {
+            "title": "Canal",
+            "type": "string"
+          },
+          "destino": {
+            "title": "Destino",
+            "type": "string"
+          }
+        },
+        "required": [
+          "pedido",
+          "canal",
+          "destino"
+        ],
+        "title": "google_pedirArguments",
+        "type": "object"
+      },
+      "outputSchema": {
+        "properties": {
+          "result": {
+            "additionalProperties": true,
+            "title": "Result",
+            "type": "object"
+          }
+        },
+        "required": [
+          "result"
+        ],
+        "title": "google_pedirOutput",
+        "type": "object"
+      }
+    },
+    {
+      "name": "google_fila_proxima",
+      "description": "Para a SESSAO DO CLAUDE: proximo pedido de Calendar/Drive/Gmail vindo do celular pelo modelo local (ou vazio).",
+      "inputSchema": {
+        "properties": {},
+        "title": "google_fila_proximaArguments",
+        "type": "object"
+      },
+      "outputSchema": {
+        "properties": {
+          "result": {
+            "additionalProperties": true,
+            "title": "Result",
+            "type": "object"
+          }
+        },
+        "required": [
+          "result"
+        ],
+        "title": "google_fila_proximaOutput",
+        "type": "object"
+      }
+    },
+    {
+      "name": "google_fila_responder",
+      "description": "Para a SESSAO DO CLAUDE: entrega a resposta curta (texto simples) de um pedido do Google ao canal de origem.",
+      "inputSchema": {
+        "properties": {
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "resposta": {
+            "title": "Resposta",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "resposta"
+        ],
+        "title": "google_fila_responderArguments",
+        "type": "object"
+      },
+      "outputSchema": {
+        "properties": {
+          "result": {
+            "additionalProperties": true,
+            "title": "Result",
+            "type": "object"
+          }
+        },
+        "required": [
+          "result"
+        ],
+        "title": "google_fila_responderOutput",
+        "type": "object"
+      }
+    },
+    {
+      "name": "canal_proxima",
+      "description": "Para a SESSAO DO CLAUDE dos canais: pega o proximo pedido da pessoa vindo do Telegram/WhatsApp (ja com audio transcrito,\nfoto descrita, video e documentos entendidos; os arquivos ficam no caminho indicado). Devolve id, canal, pedido e se veio em\nvoz; ou {vazio: true}. Responda SEMPRE com canal_responder usando o mesmo id.",
+      "inputSchema": {
+        "properties": {},
+        "title": "canal_proximaArguments",
+        "type": "object"
+      },
+      "outputSchema": {
+        "properties": {
+          "result": {
+            "additionalProperties": true,
+            "title": "Result",
+            "type": "object"
+          }
+        },
+        "required": [
+          "result"
+        ],
+        "title": "canal_proximaOutput",
+        "type": "object"
+      }
+    },
+    {
+      "name": "canal_responder",
+      "description": "Para a SESSAO DO CLAUDE dos canais: entrega a resposta ao canal de origem do pedido `id`. Texto simples, curto, sem markdown\n(a pessoa e cega). `audio` omitido = responde em voz quando a pessoa mandou voz; true forca voz; false forca texto.",
+      "inputSchema": {
+        "properties": {
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "resposta": {
+            "title": "Resposta",
+            "type": "string"
+          },
+          "audio": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Audio"
+          }
+        },
+        "required": [
+          "id",
+          "resposta"
+        ],
+        "title": "canal_responderArguments",
+        "type": "object"
+      },
+      "outputSchema": {
+        "properties": {
+          "result": {
+            "additionalProperties": true,
+            "title": "Result",
+            "type": "object"
+          }
+        },
+        "required": [
+          "result"
+        ],
+        "title": "canal_responderOutput",
+        "type": "object"
+      }
+    },
+    {
+      "name": "canal_enviar_arquivo",
+      "description": "Para a SESSAO DO CLAUDE dos canais: envia um arquivo do computador (ate 45 MB) a pessoa, no canal do pedido `id`. So vai para\na propria pessoa, nunca para outro destino. Depois chame canal_responder para fechar o pedido.",
+      "inputSchema": {
+        "properties": {
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "caminho": {
+            "title": "Caminho",
+            "type": "string"
+          },
+          "legenda": {
+            "default": "",
+            "title": "Legenda",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "caminho"
+        ],
+        "title": "canal_enviar_arquivoArguments",
+        "type": "object"
+      },
+      "outputSchema": {
+        "properties": {
+          "result": {
+            "additionalProperties": true,
+            "title": "Result",
+            "type": "object"
+          }
+        },
+        "required": [
+          "result"
+        ],
+        "title": "canal_enviar_arquivoOutput",
+        "type": "object"
+      }
+    },
+    {
+      "name": "canais_configurar",
+      "description": "Ajusta os canais do celular. cerebro: 'claude' (sessao trancada do Claude, com reserva local) ou 'local' (so o modelo do\nbackend). voz_espelho: responder em voz quando a pessoa mandar voz. Sem argumentos, mostra o estado.",
+      "inputSchema": {
+        "properties": {
+          "cerebro": {
+            "default": "",
+            "title": "Cerebro",
+            "type": "string"
+          },
+          "voz_espelho": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Voz Espelho"
+          }
+        },
+        "title": "canais_configurarArguments",
+        "type": "object"
+      },
+      "outputSchema": {
+        "properties": {
+          "result": {
+            "additionalProperties": true,
+            "title": "Result",
+            "type": "object"
+          }
+        },
+        "required": [
+          "result"
+        ],
+        "title": "canais_configurarOutput",
+        "type": "object"
+      }
+    },
+    {
+      "name": "contato_salvar",
+      "description": "Guarda um apelido para depois mandar mensagem dizendo so o apelido. app='telegram': chat_id numerico (ex: apelido 'mae',\nchat_id '123456'). app='whatsapp': chat_id e o telefone com DDD OU o nome de um contato do celular (ex: apelido\n'minha mulher', chat_id 'Mozao'). Use para parentesco: quando a pessoa disser 'mozao e minha mulher', guarde assim.",
+      "inputSchema": {
+        "properties": {
+          "apelido": {
+            "title": "Apelido",
+            "type": "string"
+          },
+          "chat_id": {
+            "title": "Chat Id",
+            "type": "string"
+          },
+          "app": {
+            "default": "telegram",
+            "title": "App",
+            "type": "string"
+          }
+        },
+        "required": [
+          "apelido",
+          "chat_id"
+        ],
+        "title": "contato_salvarArguments",
+        "type": "object"
+      },
+      "outputSchema": {
+        "properties": {
+          "result": {
+            "additionalProperties": true,
+            "title": "Result",
+            "type": "object"
+          }
+        },
+        "required": [
+          "result"
+        ],
+        "title": "contato_salvarOutput",
+        "type": "object"
+      }
+    },
+    {
+      "name": "contato_listar",
+      "description": "Lista os apelidos de contatos salvos (app='telegram' ou 'whatsapp').",
+      "inputSchema": {
+        "properties": {
+          "app": {
+            "default": "telegram",
+            "title": "App",
+            "type": "string"
+          }
+        },
+        "title": "contato_listarArguments",
+        "type": "object"
+      },
+      "outputSchema": {
+        "properties": {
+          "result": {
+            "additionalProperties": true,
+            "title": "Result",
+            "type": "object"
+          }
+        },
+        "required": [
+          "result"
+        ],
+        "title": "contato_listarOutput",
+        "type": "object"
+      }
+    },
+    {
+      "name": "contato_remover",
+      "description": "Remove um apelido de contato salvo (app='telegram' ou 'whatsapp').",
+      "inputSchema": {
+        "properties": {
+          "apelido": {
+            "title": "Apelido",
+            "type": "string"
+          },
+          "app": {
+            "default": "telegram",
+            "title": "App",
+            "type": "string"
+          }
+        },
+        "required": [
+          "apelido"
+        ],
+        "title": "contato_removerArguments",
+        "type": "object"
+      },
+      "outputSchema": {
+        "properties": {
+          "result": {
+            "additionalProperties": true,
+            "title": "Result",
+            "type": "object"
+          }
+        },
+        "required": [
+          "result"
+        ],
+        "title": "contato_removerOutput",
+        "type": "object"
+      }
+    },
+    {
+      "name": "whatsapp_contatos",
+      "description": "Procura nos contatos do WhatsApp da pessoa (os nomes que ela salvou no celular: mae, pai, mozao...). Sem `busca`, lista\nalguns. Devolve nome e final do telefone, para a pessoa confirmar quem e. A agenda fica so neste computador. Se vier\nvazia, o WhatsApp ainda nao entregou a lista: tente de novo em um minuto.",
+      "inputSchema": {
+        "properties": {
+          "busca": {
+            "default": "",
+            "title": "Busca",
+            "type": "string"
+          }
+        },
+        "title": "whatsapp_contatosArguments",
+        "type": "object"
+      },
+      "outputSchema": {
+        "properties": {
+          "result": {
+            "additionalProperties": true,
+            "title": "Result",
+            "type": "object"
+          }
+        },
+        "required": [
+          "result"
+        ],
+        "title": "whatsapp_contatosOutput",
+        "type": "object"
+      }
+    },
+    {
+      "name": "whatsapp_send",
+      "description": "Envia mensagem de WhatsApp, em DUAS etapas. `para` aceita o NOME como esta salvo no celular da pessoa (mae, mozao, pai...),\num apelido (contato_salvar app='whatsapp'), o telefone com DDD ou o `jid` de uma mensagem recebida (para responder).\nSe houver mais de um contato com o nome, volta erro listando as opcoes: pergunte qual.\n1) Chame sem `codigo_confirmacao`: NADA e enviado; volta o rascunho e um codigo. Leia em voz alta o destinatario e o texto\n   e pergunte 'Posso enviar?'.\n2) So depois do 'sim' da pessoa, chame de novo com os mesmos para e text e o `codigo_confirmacao` (vale por 10 minutos).\n   Se a pessoa mudar o texto, comece de novo. Confirme ao final se foi enviado, sem inventar.",
+      "inputSchema": {
+        "properties": {
+          "para": {
+            "title": "Para",
+            "type": "string"
+          },
+          "text": {
+            "title": "Text",
+            "type": "string"
+          },
+          "codigo_confirmacao": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Codigo Confirmacao"
+          }
+        },
+        "required": [
+          "para",
+          "text"
+        ],
+        "title": "whatsapp_sendArguments",
+        "type": "object"
+      },
+      "outputSchema": {
+        "properties": {
+          "result": {
+            "additionalProperties": true,
+            "title": "Result",
+            "type": "object"
+          }
+        },
+        "required": [
+          "result"
+        ],
+        "title": "whatsapp_sendOutput",
+        "type": "object"
+      }
+    },
+    {
+      "name": "telegram_send",
+      "description": "Envia mensagem pelo bot do Telegram, em DUAS etapas. `chat_id` aceita o numero ou um apelido salvo.\n1) Chame sem `codigo_confirmacao`: NADA e enviado; volta o rascunho e um codigo. Leia em voz alta o destinatario e o texto\n   e pergunte 'Posso enviar?'.\n2) So depois do 'sim' da pessoa, chame de novo com os mesmos chat_id e text e o `codigo_confirmacao` recebido\n   (vale por 10 minutos). Se a pessoa mudar o texto, comece de novo.",
+      "inputSchema": {
+        "properties": {
+          "chat_id": {
+            "title": "Chat Id",
+            "type": "string"
+          },
+          "text": {
+            "title": "Text",
+            "type": "string"
+          },
+          "bot_id": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Bot Id"
+          },
+          "codigo_confirmacao": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Codigo Confirmacao"
+          }
+        },
+        "required": [
+          "chat_id",
+          "text"
+        ],
+        "title": "telegram_sendArguments",
+        "type": "object"
+      },
+      "outputSchema": {
+        "properties": {
+          "result": {
+            "additionalProperties": true,
+            "title": "Result",
+            "type": "object"
+          }
+        },
+        "required": [
+          "result"
+        ],
+        "title": "telegram_sendOutput",
+        "type": "object"
+      }
+    },
+    {
+      "name": "channel_describe_image",
+      "description": "Gera a audiodescricao completa de uma foto/imagem recebida no Telegram (via telegram_file_id)\nou no WhatsApp/disco local (via file_path) para leitura por pessoas cegas.",
+      "inputSchema": {
+        "properties": {
+          "file_path": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "File Path"
+          },
+          "telegram_file_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Telegram File Id"
+          },
+          "prompt": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Prompt"
+          },
+          "bot_id": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Bot Id"
+          }
+        },
+        "title": "channel_describe_imageArguments",
+        "type": "object"
+      },
+      "outputSchema": {
+        "properties": {
+          "result": {
+            "additionalProperties": true,
+            "title": "Result",
+            "type": "object"
+          }
+        },
+        "required": [
+          "result"
+        ],
+        "title": "channel_describe_imageOutput",
+        "type": "object"
+      }
+    },
+    {
+      "name": "channel_transcribe_audio",
+      "description": "Transcreve em texto uma mensagem de voz ou audio recebida no Telegram (via telegram_file_id)\nou no WhatsApp/disco local (via file_path, ex: .ogg, .opus, .mp3, .wav, .m4a).",
+      "inputSchema": {
+        "properties": {
+          "file_path": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "File Path"
+          },
+          "telegram_file_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Telegram File Id"
+          },
+          "language": {
+            "default": "pt",
+            "title": "Language",
+            "type": "string"
+          },
+          "bot_id": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Bot Id"
+          }
+        },
+        "title": "channel_transcribe_audioArguments",
+        "type": "object"
+      },
+      "outputSchema": {
+        "properties": {
+          "result": {
+            "additionalProperties": true,
+            "title": "Result",
+            "type": "object"
+          }
+        },
+        "required": [
+          "result"
+        ],
+        "title": "channel_transcribe_audioOutput",
+        "type": "object"
+      }
+    }
+  ]
+}
