@@ -100,7 +100,7 @@ def test_describe_image_hands_the_image_to_claude_and_needs_no_ai_key():
     out = remote_image.entregar(base64.b64encode(buf.getvalue()).decode(), "que cor e?")
     assert [b.type for b in out] == ["text", "image"]
     assert "que cor e?" in out[0].text and out[1].mimeType == "image/jpeg"
-    assert set(remote_image.SCHEMA["properties"]) == {"image_base64", "prompt"}  # sem file_path, api_key, provider, model
+    assert set(remote_image.SCHEMA["properties"]) == {"image_base64", "url", "prompt"}  # sem file_path, api_key, provider, model
     with pytest.raises(ValueError):
         remote_image.entregar("isto nao e uma imagem")
 
@@ -113,8 +113,44 @@ def test_scanned_pdf_never_uses_the_owners_ai_key():
     assert "ocr_scanned" not in sch["properties"]
 
 
-def test_system_tools_are_only_the_two_that_show_no_content_of_the_pc():
-    sistema = {n for n in REMOTE_READ_ONLY if n.startswith("blind-system__")}
-    assert sistema == {"blind-system__saude_teclado", "blind-system__vigia_status"}
-    assert not allowed("blind-system__acoes_recentes") and not allowed("blind-system__trabalho_nao_salvo")
-    assert not allowed("blind-system__vigia_configurar")
+def test_no_system_tool_is_offered_remotely():
+    assert not any(n.startswith("blind-system__") for n in REMOTE_READ_ONLY)
+    for nome in ("saude_teclado", "vigia_status", "vigia_configurar", "acoes_recentes", "trabalho_nao_salvo"):
+        assert not allowed(f"blind-system__{nome}")
+
+
+def test_public_links_never_reach_the_pc_or_the_local_network():
+    from blind_mcp import remote_fetch
+
+    for ruim in ("http://localhost/x.pdf", "http://127.0.0.1/x.pdf", "http://10.0.0.5/x.pdf", "http://192.168.1.2/x",
+                 "http://169.254.169.254/latest", "ftp://exemplo.com/x.pdf", "http://user:senha@exemplo.com/x.pdf",
+                 "file:///C:/Windows/win.ini", "http://impressora.local/x", ""):
+        with pytest.raises(ValueError):
+            remote_fetch.validar(ruim)
+
+
+def test_a_redirect_to_a_private_address_is_refused():
+    import httpx
+
+    from blind_mcp import remote_fetch
+
+    def handler(request):
+        return httpx.Response(302, headers={"location": "http://127.0.0.1:8770/segredo"})
+
+    async def go():
+        cliente = httpx.AsyncClient(transport=httpx.MockTransport(handler), follow_redirects=False)
+        try:
+            with pytest.raises(ValueError):
+                await remote_fetch.baixar("http://exemplo.com/x.pdf", 1000, client=cliente)
+        finally:
+            await cliente.aclose()
+
+    # exemplo.com precisa resolver para o primeiro salto passar; se a rede estiver fora, o primeiro salto ja e recusado
+    asyncio.run(go())
+
+
+def test_document_tools_take_a_public_url_and_never_a_path():
+    from blind_mcp.remote_allowlist import clean_schema
+
+    sch = clean_schema({"type": "object", "properties": {"file_path": {}, "file_base64": {}}}, "blind-docs__read_document")
+    assert "url" in sch["properties"] and "file_path" not in sch["properties"]

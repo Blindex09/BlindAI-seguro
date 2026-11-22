@@ -24,10 +24,8 @@ REMOTE_READ_ONLY = {
     "blind-memory__session_search": "busca nas conversas do proprio Blind",
     "blind-schedule__blindschedule_list": "lista os lembretes; nao cria nem apaga",
     "blind-speech__list_voices": "lista as vozes instaladas",
-    "blind-docs__read_document": "le o texto de um documento que a pessoa manda em base64 (nunca por caminho)",
-    "blind-docs__describe_image": "entrega uma imagem em base64 ao Claude para ele descrever; sem chave de IA, nunca por caminho",
-    "blind-system__saude_teclado": "estado do teclado e do mouse; so leitura, sem conteudo do computador",
-    "blind-system__vigia_status": "estado do vigia (ligado ou nao); so leitura, sem conteudo do computador",
+    "blind-docs__read_document": "le o texto de um PDF que a pessoa manda em base64 ou por link publico da web (nunca por caminho)",
+    "blind-docs__describe_image": "entrega uma imagem (base64 ou link publico da web) ao Claude para ele descrever; sem chave de IA, nunca por caminho",
 }
 
 # argumentos que o gateway fixa e o Claude nao escolhe: o OCR de PDF escaneado usaria a chave de IA do dono
@@ -47,11 +45,17 @@ def with_forced(qualified: str, arguments) -> dict:
     return {**(arguments or {}), **REMOTE_FORCED_ARGS.get(qualified, {})}
 
 
+URL_TOOLS = frozenset({"blind-docs__read_document", "blind-docs__describe_image"})
+URL_PROP = {"url": {"type": "string", "description": "Link publico (http ou https) do arquivo na web. Alternativa ao base64."}}
+
+
 def clean_schema(schema: dict, qualified: str = "") -> dict:
     """O esquema da ferramenta sem os argumentos proibidos nem os fixos, para o Claude nem ver que existem."""
     hidden = REMOTE_FORBIDDEN_ARGS | set(REMOTE_FORCED_ARGS.get(qualified, {}))
     out = dict(schema or {})
     props = {k: v for k, v in (out.get("properties") or {}).items() if k not in hidden}
+    if qualified in URL_TOOLS:
+        props = {**props, **URL_PROP}
     out["properties"] = props
     if out.get("required"):
         out["required"] = [r for r in out["required"] if r not in hidden]
@@ -70,7 +74,7 @@ def guia() -> str:
         "Blind AI, conector remoto (so leitura).",
         "Este conector nao apaga, envia nem grava nada, e nao mexe no computador. "
         "Se a pessoa pedir algo assim, diga que isso se faz no Blind do computador, por voz.",
-        "Imagens e PDFs entram so por conteudo em base64. PDF escaneado nao passa por OCR aqui: mande as paginas como imagem em describe_image.",
+        "Imagens e PDFs entram por conteudo em base64 ou por link publico da web (url). Nunca por caminho do computador. PDF escaneado nao passa por OCR aqui: mande as paginas como imagem em describe_image.",
         "Ferramentas deste conector:",
         linhas,
     ])

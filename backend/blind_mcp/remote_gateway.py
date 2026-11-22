@@ -34,8 +34,9 @@ from starlette.types import Receive, Scope, Send
 
 from .config import config_path, default_data_dir, load_specs
 from .manager import MCPManager
-from . import remote_image
-from .remote_allowlist import allowed, clean_schema, forbidden_args, guia, with_forced
+import base64
+from . import remote_fetch, remote_image
+from .remote_allowlist import URL_TOOLS, allowed, clean_schema, forbidden_args, guia, with_forced
 DESCRIBE = "blind-docs__describe_image"
 
 logger = logging.getLogger("blind.remote")
@@ -99,8 +100,16 @@ def build_app() -> Starlette:
         proibidos = forbidden_args(arguments)
         if proibidos:  # um caminho de arquivo leria o computador: so o conteudo em base64 vale aqui
             raise RuntimeError(f"Este conector nao aceita estes argumentos: {', '.join(proibidos)}. Arquivos so por conteudo em base64.")
+        arguments = dict(arguments or {})
+        link = arguments.pop("url", None) if name in URL_TOOLS else None
+        if link:  # link publico da web: o gateway baixa (sem rede interna) e passa o conteudo adiante
+            try:
+                dados = await remote_fetch.baixar(str(link), remote_image.MAX_BYTES)
+            except ValueError as exc:
+                raise RuntimeError(str(exc)) from exc
+            arguments["image_base64" if name == DESCRIBE else "file_base64"] = base64.b64encode(dados).decode("ascii")
         if name == DESCRIBE:
-            return remote_image.entregar(str((arguments or {}).get("image_base64") or ""), (arguments or {}).get("prompt"))
+            return remote_image.entregar(str(arguments.get("image_base64") or ""), arguments.get("prompt"))
         result = await manager.call_raw(name, with_forced(name, arguments), from_model=True)
         if result.isError:  # o decorador transforma excecao em isError
             raise RuntimeError("\n".join(getattr(b, "text", "") for b in result.content) or "falha na ferramenta")

@@ -18,13 +18,13 @@ SCHEMA = {
     "type": "object",
     "properties": {
         "image_base64": {"type": "string", "description": "A imagem (PNG, JPEG, WebP...) em base64."},
+        "url": {"type": "string", "description": "Link publico (http ou https) da imagem na web. Alternativa ao base64."},
         "prompt": {"type": "string", "description": "O que a pessoa quer saber sobre a imagem (opcional)."},
     },
-    "required": ["image_base64"],
 }
 DESCRICAO = (
     "Entrega uma imagem ao Claude para ele descrever para uma pessoa cega. Sem chave de IA. "
-    "A imagem vai em base64; caminho de arquivo nao e aceito."
+    "A imagem vai em base64 ou por link publico da web; caminho de arquivo nao e aceito."
 )
 
 
