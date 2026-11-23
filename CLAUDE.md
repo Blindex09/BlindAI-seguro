@@ -48,6 +48,8 @@ epos ia\openbot` e `repohermes`): `whatsapp_pair` pede o codigo de 8 caracteres 
 Outras melhorias de 17/11/2026: `comecar` devolve `estado` (servidores configurados x faltando); agent-desktop `click`/`type_text`/`element_action` devolvem `mudancas` e `type_text` devolve `confirmado`; `descrever_janela` (visao); `telegram_send` em duas etapas (rascunho + codigo) e apelidos (`contato_*`); lembretes `repeat='diario'|'semanal'` e `schedule_snooze`; `read_document(continuar=true)` e `document_outline`. Teste de guia: `test_melhorias.py` falha se o guia citar ferramenta inexistente.
 | `blind-stt` | Ditado local (Whisper). Escondido do modelo (audio nao vai para LLM). |
 
+**Blindaudio** (`blindaudio`, ferramenta do proprio servidor `blind`; codigo em `backend/blind_mcp/audio_tool.py` + `audio_worker.py`): transcreve audio em texto com Whisper local, por caminho (so local), base64 ou link publico (`url`). Roda num processo que termina ao acabar (importar numpy/faster-whisper dentro de servidor stdio ja em andamento trava no Windows). O gateway remoto (`remote_gateway.py`) oferece a mesma `blindaudio`, sem caminho. Download de link e `web_read` usam IP fixo (`remote_fetch.py`).
+
 ## Regras de trabalho
 
 - **Config do app Claude:** o app le `%LOCALAPPDATA%\Claude-Data\<id-da-instalacao>\claude_desktop_config.json`. O arquivo em `%APPDATA%\Claude` NAO vale. Edite o certo (com copia `.bak-...`), peca para sair pela bandeja e reabrir, e confira com `saude_teclado`.

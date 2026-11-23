@@ -11,7 +11,8 @@
       "cwd": "${BACKEND_DIR}",
       "env": {
         "PYTHONUTF8": "1"
-      }
+      },
+      "callTimeout": 900
     },
     "windows": {
       "description": "Windows-MCP (CursorTouch): captura, apps, processos, arquivos, PowerShell, Registro e MOUSE (Click, Move, Scroll, ativados em 17/11/2026 so com a protecao do guarda). SEM teclado: Type, Shortcut, MultiEdit e MultiSelect continuam excluidos. WINDOWS_MCP_CONTROL=false: sem os ganchos globais que travaram o teclado (3 vezes, 16/11/2026).",

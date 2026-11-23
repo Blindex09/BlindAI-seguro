@@ -10,7 +10,7 @@ from __future__ import annotations
 import json
 import os
 from pathlib import Path
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Optional
 
 from mcp.server.fastmcp import FastMCP
 
@@ -122,7 +122,7 @@ BOAS PRATICAS
 - Se o teclado da pessoa travar: peca que aperte e solte Shift, Ctrl, Alt e Windows, depois Ctrl+Alt+Del; quando voltar,
   rode saude_teclado e acoes_recentes e diga qual foi a ultima acao.
 - Se uma ferramenta falhar, leia o erro, diga em uma frase o que houve e tente um caminho alternativo antes de desistir.
-- Ditado por voz (blind-stt) nao esta disponivel aqui: no Claude, a pessoa usa a voz/ditado do proprio Claude ou do Windows (Win+H).
+- Audio para texto (arquivo de voz, mensagem de voz, gravacao): blindaudio (ferramenta do proprio blind; Whisper no computador; entra por caminho do arquivo, base64 ou link publico (url); language pt, en ou auto). Leia o texto e diga a duracao. O ditado ao vivo (blind-stt) segue so no app: no Claude, a pessoa usa a voz do proprio Claude ou do Windows (Win+H).
 """
 
 mcp = FastMCP("blind", instructions=(
@@ -228,6 +228,22 @@ async def comecar(pedido: str = "", habilidade: str = "") -> Dict[str, Any]:
         "estado": estado,
         "lembrete": "O guia descreve o que existe no projeto. So use o que aparece na lista de ferramentas desta conversa.",
     }
+
+
+@mcp.tool()
+async def blindaudio(
+    file_path: Optional[str] = None,
+    audio_base64: Optional[str] = None,
+    url: Optional[str] = None,
+    language: Optional[str] = "pt",
+) -> Dict[str, Any]:
+    """Blindaudio: transcreve um audio (voz, mensagem de voz, gravacao; WAV, MP3, M4A, OGG, FLAC, WebM) em texto com Whisper,
+    no computador do Blind: o audio nao vai para servico de IA nenhum. Entra por caminho do arquivo, por base64 ou por link
+    publico da web (`url`). `language`: 'pt' (padrao), 'en', ... ou 'auto'. A primeira vez baixa o modelo e demora.
+    Depois, leia o texto para a pessoa e diga a duracao do audio."""
+    from blind_mcp import audio_tool
+
+    return await audio_tool.transcrever(file_path=file_path, audio_base64=audio_base64, url=url, language=language)
 
 
 if __name__ == "__main__":

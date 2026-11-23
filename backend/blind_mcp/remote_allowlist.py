@@ -48,6 +48,16 @@ def with_forced(qualified: str, arguments) -> dict:
 
 
 URL_TOOLS = frozenset({"blind-docs__read_document", "blind-docs__describe_image"})
+BLINDAUDIO = "blindaudio"  # ferramenta do proprio gateway (como o comecar): audio em texto, so por base64 ou link publico
+AUDIO_MAX_BYTES = 30 * 1024 * 1024  # o audio em base64 passa pelo Claude: mais que isso so por link
+BLINDAUDIO_SCHEMA = {
+    "type": "object",
+    "properties": {
+        "audio_base64": {"type": "string", "description": "O audio (WAV, MP3, M4A, OGG, FLAC, WebM) em base64. Curto; para audio longo use url."},
+        "url": {"type": "string", "description": "Link publico (http ou https) do audio na web. Alternativa ao base64."},
+        "language": {"type": "string", "description": "pt (padrao), en, ... ou auto para o Whisper descobrir."},
+    },
+}
 URL_PROP = {"url": {"type": "string", "description": "Link publico (http ou https) do arquivo na web. Alternativa ao base64."}}
 
 
@@ -92,13 +102,15 @@ def _habilidade(nome: str, secao: str = "") -> str:
 def guia() -> str:
     """O que `comecar` responde no gateway remoto: as ferramentas desta lista e o jeito de falar do Blind para pessoa cega."""
     nl = chr(10)
-    linhas = nl.join(f"- {nome}: {motivo}" for nome, motivo in sorted(REMOTE_READ_ONLY.items()))
+    linhas = nl.join([*(f"- {nome}: {motivo}" for nome, motivo in sorted(REMOTE_READ_ONLY.items())),
+                      "- blindaudio: transcreve audio em texto com Whisper no computador do Blind (base64 ou link publico; nunca por caminho)"])
     partes = [
         "Blind AI, conector remoto (so leitura).",
         "Este conector nao apaga, envia nem grava nada, e nao mexe no computador. "
         "Se a pessoa pedir algo assim, diga que isso se faz no Blind do computador, por voz.",
         "Imagens e PDFs entram por conteudo em base64 ou por link publico da web (url). Nunca por caminho do computador. "
         "PDF escaneado nao passa por OCR aqui: mande as paginas como imagem em describe_image. "
+        "Audio (voz, mensagem de voz) vira texto em blindaudio, por base64 curto ou, melhor, por link publico (url); leia o texto e diga a duracao. "
         "Um arquivo anexado na conversa voce mesmo ja le: nao precisa de ferramenta.",
         "OBRIGATORIO: a pessoa pode ser cega e ouve a resposta. Siga estas regras de fala, de descricao de imagens e de leitura de documentos.",
         "## Jeito de falar" + nl + _habilidade("jeito-de-falar"),

@@ -15,6 +15,7 @@ Uso:  python -m blind_mcp.remote_gateway   (variaveis: BLIND_REMOTE_PORT, padrao
 from __future__ import annotations
 
 import contextlib
+import json
 import logging
 import os
 from pathlib import Path
@@ -34,8 +35,8 @@ from .config import config_path, default_data_dir, load_specs
 from .manager import MCPManager
 from .remote_oauth import IdP, OAuthConfig, OAuthServer
 import base64
-from . import remote_fetch, remote_image
-from .remote_allowlist import URL_TOOLS, allowed, clean_schema, forbidden_args, guia, with_forced
+from . import audio_tool, remote_fetch, remote_image
+from .remote_allowlist import AUDIO_MAX_BYTES, BLINDAUDIO, BLINDAUDIO_SCHEMA, URL_TOOLS, allowed, clean_schema, forbidden_args, guia, with_forced
 DESCRIBE = "blind-docs__describe_image"
 
 logger = logging.getLogger("blind.remote")
@@ -78,6 +79,7 @@ def build_app(oauth_config: Optional[OAuthConfig] = None, idp: Optional[IdP] = N
                 inputSchema={"type": "object", "properties": {"pedido": {"type": "string"}}},
             )
         ]
+        tools.append(types.Tool(name=BLINDAUDIO, description=audio_tool.DESCRICAO, inputSchema=BLINDAUDIO_SCHEMA))
         for ref in manager.list_tools():
             if ref.hidden_from_model or not allowed(ref.qualified):
                 continue
@@ -91,6 +93,18 @@ def build_app(oauth_config: Optional[OAuthConfig] = None, idp: Optional[IdP] = N
     async def _call(name: str, arguments: dict) -> Any:
         if name == COMECAR:
             return [types.TextContent(type="text", text=guia())]
+        if name == BLINDAUDIO:  # audio em texto: o gateway mesmo transcreve, so por base64 ou link publico
+            if forbidden_args(arguments):
+                raise RuntimeError(f"Este conector nao aceita estes argumentos: {', '.join(forbidden_args(arguments))}. Audio so por base64 ou link publico.")
+            arguments = dict(arguments or {})
+            bruto = str(arguments.get("audio_base64") or "").split(",", 1)[-1]
+            if len(bruto) * 3 // 4 > AUDIO_MAX_BYTES:
+                raise RuntimeError("O audio e grande demais para este conector (mais de 30 MB). Mande um trecho menor ou um link publico.")
+            try:
+                return [types.TextContent(type="text", text=json.dumps(await audio_tool.transcrever(
+                    audio_base64=arguments.get("audio_base64"), url=arguments.get("url"), language=arguments.get("language") or "pt"), ensure_ascii=False))]
+            except (ValueError, FileNotFoundError) as exc:
+                raise RuntimeError(str(exc)) from exc
         if not allowed(name):  # a lista vale para chamar, nao so para listar
             raise RuntimeError(f"Ferramenta indisponivel pelo gateway remoto: {name}")
         proibidos = forbidden_args(arguments)

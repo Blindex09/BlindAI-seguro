@@ -711,22 +711,24 @@ async def web_search(query: str, max_results: int = 5) -> Dict[str, Any]:
 async def web_read(url: str, max_chars: int = 15000) -> Dict[str, Any]:
     """Abre uma pagina web e extrai apenas o texto principal e os titulos, sem banners, menus ou anuncios,
     ideal para leitura direta por pessoas cegas."""
-    safe_url = await run_blocking(_validate_safe_public_url, url)
+    from .. import remote_fetch
+
     cap = max(500, min(int(max_chars or 15000), MAX_TEXT_CHARS))
     headers = {
         "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/124.0 Safari/537.36",
         "Accept-Language": "pt-BR,pt;q=0.9,en;q=0.8",
     }
-    async with httpx.AsyncClient(timeout=20.0, follow_redirects=True, headers=headers) as client:
-        resp = await client.get(safe_url)
-        # Valida tambem o destino final apos redirects contra SSRF
-        await run_blocking(_validate_safe_public_url, str(resp.url))
-        ctype = (resp.headers.get("content-type") or "").lower()
-        if "application/pdf" in ctype:
-            b64_pdf = base64.b64encode(resp.content).decode("ascii")
-            doc_res = await read_document(file_base64=b64_pdf, ocr_scanned=True)
-            return {"ok": True, "url": str(resp.url), "title": doc_res.get("filename", "PDF"), "content": doc_res.get("text", "")}
-        raw_html = resp.text
+    # IP fixo e redirecionamento conferido salto a salto (remote_fetch.py): nada de DNS que troca entre a conferencia e a conexao
+    corpo, safe_url, ctype = await remote_fetch.buscar(url, URL_MAX_BYTES, headers=headers)
+    if "application/pdf" in ctype:
+        b64_pdf = base64.b64encode(corpo).decode("ascii")
+        doc_res = await read_document(file_base64=b64_pdf, ocr_scanned=True)
+        return {"ok": True, "url": safe_url, "title": doc_res.get("filename", "PDF"), "content": doc_res.get("text", "")}
+    m = re.search(r"charset=([\w-]+)", ctype)
+    try:
+        raw_html = corpo.decode(m.group(1) if m else "utf-8", errors="replace")
+    except LookupError:
+        raw_html = corpo.decode("utf-8", errors="replace")
 
     title, content = _html_to_clean_accessible_text(raw_html)
     return {

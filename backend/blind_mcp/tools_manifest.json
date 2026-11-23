@@ -1,6 +1,7 @@
 {
   "proprios": {
     "blind": [
+      "blindaudio",
       "comecar"
     ],
     "agent-desktop": [
