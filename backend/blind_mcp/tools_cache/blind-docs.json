@@ -4,7 +4,7 @@
   "tools": [
     {
       "name": "read_document",
-      "description": "Extrai o texto de um PDF (por caminho, base64 ou link publico da web `url`, opcionalmente filtrando paginas ex: '1-3,5').\nSe o PDF for digitalizado como imagem (sem texto selecionavel) e ocr_scanned=True, renderiza as\npaginas e executa OCR/audiodescricao automatica via modelo de visao.\nO Blind guarda ate onde voce leu cada arquivo (`ultima_pagina_lida`). Com continuar=true le as proximas 3 paginas depois\ndessa posicao (\"continua de onde parou\"). Veja document_outline para pular por titulo.",
+      "description": "Extrai o texto de um PDF (por caminho, base64 ou link publico da web `url`, opcionalmente filtrando paginas ex: '1-3,5').\nSe o PDF for digitalizado como imagem (sem texto selecionavel) e ocr_scanned=True, renderiza as\npaginas e executa OCR/audiodescricao automatica via modelo de visao.\nCom devolver_imagens=true (o gateway remoto fixa isso), um PDF escaneado volta com as paginas como imagem em\n`page_images` para o proprio Claude ler, sem chamar outro modelo.\nO Blind guarda ate onde voce leu cada arquivo (`ultima_pagina_lida`). Com continuar=true le as proximas 3 paginas depois\ndessa posicao (\"continua de onde parou\"). Veja document_outline para pular por titulo.",
       "inputSchema": {
         "properties": {
           "file_path": {
@@ -63,6 +63,11 @@
           "continuar": {
             "default": false,
             "title": "Continuar",
+            "type": "boolean"
+          },
+          "devolver_imagens": {
+            "default": false,
+            "title": "Devolver Imagens",
             "type": "boolean"
           }
         },
@@ -282,7 +287,7 @@
     },
     {
       "name": "web_read",
-      "description": "Abre uma pagina web e extrai apenas o texto principal e os titulos, sem banners, menus ou anuncios,\nideal para leitura direta por pessoas cegas.",
+      "description": "Abre uma pagina web e extrai apenas o texto principal e os titulos, sem banners, menus ou anuncios,\nideal para leitura direta por pessoas cegas. Em link de PDF escaneado, ocr_scanned=True usa a visao (chave de IA);\no gateway remoto fixa False e, com devolver_imagens=true (tambem fixo la), devolve as paginas como imagem para o Claude ler.",
       "inputSchema": {
         "properties": {
           "url": {
@@ -293,6 +298,16 @@
             "default": 15000,
             "title": "Max Chars",
             "type": "integer"
+          },
+          "ocr_scanned": {
+            "default": true,
+            "title": "Ocr Scanned",
+            "type": "boolean"
+          },
+          "devolver_imagens": {
+            "default": false,
+            "title": "Devolver Imagens",
+            "type": "boolean"
           }
         },
         "required": [

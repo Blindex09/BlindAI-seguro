@@ -63,6 +63,31 @@ def remote_origins(public_host: str = "") -> List[str]:
     return [f"http://127.0.0.1:{PORT}", f"http://localhost:{PORT}", *[f"https://{h}" for h in _extra_hosts(public_host)]]
 
 
+def _paginas_para_o_claude(blocos: list) -> list:
+    """PDF escaneado: tira as paginas do texto da resposta e as entrega como imagem, reduzidas, ao Claude (ele le, sem chave de IA)."""
+    saida: list = []
+    imagens: list = []
+    for b in blocos:
+        txt = getattr(b, "text", None)
+        if txt and '"page_images"' in txt:
+            try:
+                dados = json.loads(txt)
+            except ValueError:
+                saida.append(b)
+                continue
+            for pg in dados.pop("page_images", None) or []:
+                try:
+                    jpeg = remote_image.preparar(pg["image_base64"])
+                except (ValueError, KeyError):
+                    continue
+                imagens.append(types.TextContent(type="text", text=f"Pagina {pg.get('page')} do PDF escaneado:"))
+                imagens.append(types.ImageContent(type="image", data=base64.b64encode(jpeg).decode("ascii"), mimeType="image/jpeg"))
+            saida.append(types.TextContent(type="text", text=json.dumps(dados, ensure_ascii=False, indent=2)))
+        else:
+            saida.append(b)
+    return saida + imagens
+
+
 def build_app(oauth_config: Optional[OAuthConfig] = None, idp: Optional[IdP] = None, specs: Optional[list] = None):
     """O app do gateway. Sem as variaveis do login ele nao sobe: nunca ha um /mcp aberto."""
     cfg = oauth_config or OAuthConfig.from_env(default_data_dir())
@@ -99,7 +124,7 @@ def build_app(oauth_config: Optional[OAuthConfig] = None, idp: Optional[IdP] = N
             arguments = dict(arguments or {})
             bruto = str(arguments.get("audio_base64") or "").split(",", 1)[-1]
             if len(bruto) * 3 // 4 > AUDIO_MAX_BYTES:
-                raise RuntimeError("O audio e grande demais para este conector (mais de 30 MB). Mande um trecho menor ou um link publico.")
+                raise RuntimeError("O audio e grande demais para este conector (mais de 3 MB em base64). Mande um trecho menor ou, para arquivos maiores, um link publico (ate 30 MB).")
             try:
                 return [types.TextContent(type="text", text=json.dumps(await audio_tool.transcrever(
                     audio_base64=arguments.get("audio_base64"), url=arguments.get("url"), language=arguments.get("language") or "pt"), ensure_ascii=False))]
@@ -123,7 +148,7 @@ def build_app(oauth_config: Optional[OAuthConfig] = None, idp: Optional[IdP] = N
         result = await manager.call_raw(name, with_forced(name, arguments), from_model=True)
         if result.isError:  # o decorador transforma excecao em isError
             raise RuntimeError("\n".join(getattr(b, "text", "") for b in result.content) or "falha na ferramenta")
-        return list(result.content)
+        return _paginas_para_o_claude(list(result.content))
 
     session_manager = StreamableHTTPSessionManager(
         app=server,

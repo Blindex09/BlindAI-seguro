@@ -6,6 +6,9 @@ Tudo isso continua no Blind local (voz, no computador), nunca atras de uma URL.
 
 Para incluir uma ferramenta, ela precisa passar nas tres perguntas de `PERGUNTAS` e entrar aqui, com o motivo,
 numa revisao. O gateway recusa qualquer nome que nao esteja nesta lista, mesmo que o servidor o tenha.
+
+Ficam FORA do remoto, por pedido da revisao da casa (24/11/2026): `memory_recall` e `session_search`. Junto com a leitura de
+links (web_read), elas deixariam uma pagina maliciosa levar a memoria da pessoa. Continuam no Blind local, por voz.
 """
 
 from __future__ import annotations
@@ -22,16 +25,16 @@ PERGUNTAS = (
 REMOTE_READ_ONLY = {
     "blind-docs__web_search": "busca na web; nao toca no computador",
     "blind-docs__web_read": "le uma pagina da web que a pessoa pediu",
-    "blind-memory__memory_recall": "le a memoria que a pessoa pediu para lembrar",
-    "blind-memory__session_search": "busca nas conversas do proprio Blind",
     "blind-schedule__blindschedule_list": "lista os lembretes; nao cria nem apaga",
     "blind-speech__list_voices": "lista as vozes instaladas",
     "blind-docs__read_document": "le o texto de um PDF que a pessoa manda em base64 ou por link publico da web (nunca por caminho)",
     "blind-docs__describe_image": "entrega uma imagem (base64 ou link publico da web) ao Claude para ele descrever; sem chave de IA, nunca por caminho",
 }
 
-# argumentos que o gateway fixa e o Claude nao escolhe: o OCR de PDF escaneado usaria a chave de IA do dono
-REMOTE_FORCED_ARGS = {"blind-docs__read_document": {"ocr_scanned": False}}
+# argumentos que o gateway fixa e o Claude nao escolhe: o OCR de PDF escaneado usaria a chave de IA do dono (inclusive quando o
+# PDF chega por link no web_read). Em vez disso as paginas escaneadas voltam como imagem e quem le e o proprio Claude da pessoa.
+_PDF_FIXO = {"ocr_scanned": False, "devolver_imagens": True}
+REMOTE_FORCED_ARGS = {"blind-docs__read_document": dict(_PDF_FIXO), "blind-docs__web_read": dict(_PDF_FIXO)}
 
 # argumentos que o gateway remoto nunca aceita, nem lista no esquema: um caminho de arquivo leria o computador
 REMOTE_FORBIDDEN_ARGS = frozenset({"file_path", "path", "caminho", "output_path", "save_path", "api_key", "provider", "model"})
@@ -49,7 +52,7 @@ def with_forced(qualified: str, arguments) -> dict:
 
 URL_TOOLS = frozenset({"blind-docs__read_document", "blind-docs__describe_image"})
 BLINDAUDIO = "blindaudio"  # ferramenta do proprio gateway (como o comecar): audio em texto, so por base64 ou link publico
-AUDIO_MAX_BYTES = 30 * 1024 * 1024  # o audio em base64 passa pelo Claude: mais que isso so por link
+AUDIO_MAX_BYTES = 3_000_000  # o corpo do pedido ao gateway para em 4 MiB (SDK do MCP): em base64 isso e ~3 MB de audio; mais que isso so por link
 BLINDAUDIO_SCHEMA = {
     "type": "object",
     "properties": {
@@ -109,7 +112,7 @@ def guia() -> str:
         "Este conector nao apaga, envia nem grava nada, e nao mexe no computador. "
         "Se a pessoa pedir algo assim, diga que isso se faz no Blind do computador, por voz.",
         "Imagens e PDFs entram por conteudo em base64 ou por link publico da web (url). Nunca por caminho do computador. "
-        "PDF escaneado nao passa por OCR aqui: mande as paginas como imagem em describe_image. "
+        "PDF escaneado (so imagem): as paginas voltam como imagem e voce mesmo le, sem outro modelo nem chave de IA; diga que a leitura e sua e pode errar, e confirme valores, datas e nomes. "
         "Audio (voz, mensagem de voz) vira texto em blindaudio, por base64 curto ou, melhor, por link publico (url); leia o texto e diga a duracao. "
         "Um arquivo anexado na conversa voce mesmo ja le: nao precisa de ferramenta.",
         "OBRIGATORIO: a pessoa pode ser cega e ouve a resposta. Siga estas regras de fala, de descricao de imagens e de leitura de documentos.",

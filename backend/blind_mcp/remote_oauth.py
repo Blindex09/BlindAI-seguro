@@ -41,6 +41,7 @@ ACCESS_TTL = 3600
 REFRESH_TTL = 30 * 24 * 3600
 CODE_TTL = 300
 STATE_TTL = 600
+UNUSED_CLIENT_TTL = 3600  # um cliente cadastrado que nunca recebeu token some depois de 1 hora; o login normal leva minutos
 MAX_CLIENTS = 50
 CLAUDE_CALLBACKS = ("https://claude.ai/api/mcp/auth_callback", "https://claude.com/api/mcp/auth_callback")
 
@@ -133,6 +134,8 @@ class OAuthServer:
             return
         self.clients = dict(raw.get("clients") or {})
         self.refresh = {k: v for k, v in (raw.get("refresh") or {}).items() if v.get("exp", 0) > self.now()}
+        if self._expire_unused_clients():
+            self._save()
 
     def _save(self) -> None:
         try:
@@ -141,8 +144,20 @@ class OAuthServer:
         except OSError:
             pass
 
+    def _expire_unused_clients(self) -> bool:
+        """Tira os clientes cadastrados que nunca receberam token e ja passaram de UNUSED_CLIENT_TTL. Quem ja recebeu token fica."""
+        t = self.now()
+        com_token = {row.get("client_id") for row in self.refresh.values()}
+        velhos = [cid for cid, c in self.clients.items()
+                  if not c.get("token") and cid not in com_token and t - float(c.get("created") or 0) > UNUSED_CLIENT_TTL]
+        for cid in velhos:
+            del self.clients[cid]
+        return bool(velhos)
+
     def _sweep(self) -> None:
         t = self.now()
+        if self._expire_unused_clients():
+            self._save()
         for table in (self.states, self.codes):
             for k in [k for k, v in table.items() if v["exp"] <= t]:
                 del table[k]
@@ -182,6 +197,7 @@ class OAuthServer:
         uris = [str(u) for u in (body.get("redirect_uris") or [])] if isinstance(body, dict) else []
         if not uris or not all(redirect_ok(u) for u in uris):
             return JSONResponse({"error": "invalid_redirect_uri", "error_description": "so o retorno do Claude ou um endereco local"}, status_code=400)
+        self._sweep()  # abre espaco: os clientes sem token e velhos saem antes de contar o limite
         if len(self.clients) >= MAX_CLIENTS:
             return JSONResponse({"error": "invalid_client_metadata", "error_description": "clientes demais"}, status_code=400)
         cid = secrets.token_urlsafe(16)
@@ -192,13 +208,13 @@ class OAuthServer:
 
     async def authorize(self, request: Request) -> Response:
         q = request.query_params
+        self._sweep()  # um cliente sem token e velho ja nao vale
         client = self.clients.get(q.get("client_id", ""))
         redirect = q.get("redirect_uri", "")
         if not client or redirect not in client["redirect_uris"]:
             return PlainTextResponse("cliente ou retorno nao cadastrado", status_code=400)
         if q.get("response_type") != "code" or q.get("code_challenge_method") != "S256" or not q.get("code_challenge"):
             return PlainTextResponse("PKCE S256 e obrigatorio", status_code=400)
-        self._sweep()
         key = secrets.token_urlsafe(24)
         self.states[key] = {"client_id": q["client_id"], "redirect_uri": redirect, "challenge": q["code_challenge"], "state": q.get("state"), "exp": self.now() + STATE_TTL}
         gh = urllib.parse.urlencode({"client_id": self.cfg.github_client_id, "redirect_uri": f"{self.cfg.base_url}/oauth/github/callback", "state": key, "allow_signup": "false"})
@@ -219,6 +235,8 @@ class OAuthServer:
 
     def _issue(self, client_id: str) -> Dict[str, Any]:
         access, refresh = secrets.token_urlsafe(32), secrets.token_urlsafe(32)
+        if client_id in self.clients:
+            self.clients[client_id]["token"] = True  # recebeu token: nao expira mais por falta de uso
         self.access[sha(access)] = self.now() + ACCESS_TTL
         self.refresh[sha(refresh)] = {"client_id": client_id, "exp": self.now() + REFRESH_TTL}
         self._save()

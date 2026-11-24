@@ -166,3 +166,37 @@ def test_login_state_can_live_outside_the_blind_data_folder(monkeypatch, tmp_pat
     assert OAuthConfig.from_env(dados).state_path == dados / "remote_oauth.json"
     monkeypatch.setenv("BLIND_REMOTE_STATE_DIR", str(estado))
     assert OAuthConfig.from_env(dados).state_path == estado / "remote_oauth.json"
+
+
+def test_a_registered_client_that_never_got_a_token_expires_but_one_with_a_token_stays(tmp_path):
+    from blind_mcp.remote_oauth import UNUSED_CLIENT_TTL
+
+    app, c = make(tmp_path)
+    oauth = app.oauth
+    with c:
+        sem_token = c.post("/oauth/register", json={"redirect_uris": [CLAUDE]}).json()["client_id"]
+        cid, cb = sign_in(c)
+        code = urllib.parse.parse_qs(urllib.parse.urlparse(cb.headers["location"]).query)["code"][0]
+        assert token(c, cid, code).status_code == 200  # este cliente recebeu token
+        passou = oauth.now() + UNUSED_CLIENT_TTL + 5
+        oauth.now = lambda: passou
+        q = {"response_type": "code", "client_id": sem_token, "redirect_uri": CLAUDE, "code_challenge": s256(VERIFIER), "code_challenge_method": "S256"}
+        assert c.get("/oauth/authorize?" + urllib.parse.urlencode(q)).status_code == 400  # sumiu: sem token e velho
+        assert sem_token not in oauth.clients and cid in oauth.clients
+
+
+def test_expired_unused_clients_free_room_and_are_dropped_from_the_saved_state(tmp_path):
+    from blind_mcp.remote_oauth import MAX_CLIENTS, UNUSED_CLIENT_TTL, OAuthServer
+
+    app, c = make(tmp_path)
+    oauth = app.oauth
+    with c:
+        for _ in range(MAX_CLIENTS):
+            assert c.post("/oauth/register", json={"redirect_uris": [CLAUDE]}).status_code == 201
+        assert c.post("/oauth/register", json={"redirect_uris": [CLAUDE]}).status_code == 400  # cheio
+        passou = oauth.now() + UNUSED_CLIENT_TTL + 5
+        oauth.now = lambda: passou
+        assert c.post("/oauth/register", json={"redirect_uris": [CLAUDE]}).status_code == 201  # os velhos sem token sairam
+        assert len(oauth.clients) == 1
+    recarregado = OAuthServer(oauth.cfg, now=lambda: passou)
+    assert len(recarregado.clients) == 1  # o disco tambem perdeu os velhos

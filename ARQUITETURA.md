@@ -113,7 +113,7 @@ Blind local e não expõe o computador. Detalhes, variáveis e passo a passo em 
 | Arquivo | O que faz |
 |---|---|
 | `backend/mcp.remote.json` | Os únicos servidores que o gateway inicia (não lê o `mcp.json`). Cada um recebe `BLIND_DATA_DIR`, porque um servidor filho não herda o ambiente. |
-| `backend/blind_mcp/remote_allowlist.py` | As 9 ferramentas de leitura oferecidas e executadas, os argumentos proibidos (caminho, chave de API, provedor, modelo) e o guia que o `comecar` devolve. |
+| `backend/blind_mcp/remote_allowlist.py` | As 6 ferramentas de leitura oferecidas (sem memória nem busca em conversas, desde 24/11/2026; PDF escaneado volta como imagem para o Claude ler) e executadas, os argumentos proibidos (caminho, chave de API, provedor, modelo) e o guia que o `comecar` devolve. |
 | `backend/blind_mcp/remote_oauth.py` | Login OAuth 2.1 com o GitHub para uma conta só: cadastro, PKCE S256, código de uso único, renovação que troca a cada uso, tokens só como hash. |
 | `backend/blind_mcp/remote_fetch.py` | Baixa PDF ou imagem de um link público, recusando endereço interno, inclusive em redirecionamento. |
 | `backend/blind_mcp/remote_image.py` | `describe_image` remoto: entrega a imagem ao próprio Claude, sem chave de IA. |

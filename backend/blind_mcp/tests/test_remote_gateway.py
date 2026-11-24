@@ -91,6 +91,7 @@ def test_describe_image_hands_the_image_to_claude_and_needs_no_ai_key():
     import base64
     import io
 
+    import mcp.types as types
     from PIL import Image
 
     from blind_mcp import remote_image
@@ -189,4 +190,48 @@ def test_the_data_folder_reaches_the_child_server_through_the_remote_config(monk
 
     monkeypatch.setenv("BLIND_DATA_DIR", str(tmp_path))
     specs = {s.name: s for s in load_specs(BACKEND / "mcp.remote.json")}
-    assert specs["blind-memory"].env["BLIND_DATA_DIR"] == str(tmp_path)
+    assert specs["blind-schedule"].env["BLIND_DATA_DIR"] == str(tmp_path)
+
+
+def test_memory_and_conversation_search_are_not_offered_and_the_memory_server_does_not_even_start():
+    """Revisao da casa (24/11/2026): com a leitura de links, elas deixariam uma pagina maliciosa levar a memoria da pessoa."""
+    assert not allowed("blind-memory__memory_recall") and not allowed("blind-memory__session_search")
+    servers = json.loads((BACKEND / "mcp.remote.json").read_text(encoding="utf-8"))["mcpServers"]
+    assert "blind-memory" not in servers
+    assert "memory_recall" not in guia() and "session_search" not in guia()
+
+
+def test_web_read_of_a_pdf_link_never_uses_the_ai_key_through_the_gateway():
+    from blind_mcp.remote_allowlist import clean_schema, with_forced
+
+    assert with_forced("blind-docs__web_read", {"url": "https://x.net/a.pdf", "ocr_scanned": True})["ocr_scanned"] is False
+    assert with_forced("blind-docs__web_read", {"url": "https://x.net/a.pdf"})["ocr_scanned"] is False
+    esquema = clean_schema({"type": "object", "properties": {"url": {}, "max_chars": {}, "ocr_scanned": {}}}, "blind-docs__web_read")
+    assert "ocr_scanned" not in esquema["properties"] and "url" in esquema["properties"]
+
+
+def test_a_scanned_pdf_goes_to_claude_as_page_images_and_never_to_another_model():
+    """PDF escaneado no remoto: sem OCR por chave de IA; as paginas voltam como imagem e o Claude da pessoa le."""
+    import base64 as b64
+    import io
+
+    import mcp.types as types
+    from PIL import Image
+
+    from blind_mcp.remote_allowlist import with_forced
+    from blind_mcp.remote_gateway import _paginas_para_o_claude
+
+    for nome in ("blind-docs__read_document", "blind-docs__web_read"):
+        fixo = with_forced(nome, {"ocr_scanned": True, "devolver_imagens": False})
+        assert fixo["ocr_scanned"] is False and fixo["devolver_imagens"] is True
+    buf = io.BytesIO()
+    Image.new("RGB", (300, 200), "white").save(buf, format="PNG")
+    png = b64.b64encode(buf.getvalue()).decode()
+    resposta = {"ok": True, "content": "", "scanned": True, "note": "PDF escaneado", "page_images": [{"page": 1, "image_base64": png}, {"page": 2, "image_base64": png}]}
+    saida = _paginas_para_o_claude([types.TextContent(type="text", text=json.dumps(resposta))])
+    textos = [b for b in saida if b.type == "text"]
+    imagens = [b for b in saida if b.type == "image"]
+    assert len(imagens) == 2 and imagens[0].mimeType == "image/jpeg"
+    assert "page_images" not in textos[0].text and "PDF escaneado" in textos[0].text  # a imagem nao viaja dentro do JSON
+    comum = [types.TextContent(type="text", text='{"text": "ola"}')]
+    assert _paginas_para_o_claude(comum) == comum  # PDF digital passa intacto

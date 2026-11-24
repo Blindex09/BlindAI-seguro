@@ -121,7 +121,7 @@ def test_blindaudio_is_offered_remotely_by_content_or_public_link_never_by_path(
     assert BLINDAUDIO == "blindaudio"
     assert set(BLINDAUDIO_SCHEMA["properties"]) == {"audio_base64", "url", "language"}  # sem file_path
     assert forbidden_args({"file_path": "C:/audio.wav"}) == ["file_path"]
-    assert "blindaudio" in guia() and AUDIO_MAX_BYTES == 30 * 1024 * 1024
+    assert "blindaudio" in guia() and AUDIO_MAX_BYTES == 3_000_000
     assert not allowed("blind-stt__transcribe")  # o ditado ao vivo continua so no app
 
 
@@ -135,7 +135,8 @@ def test_blindaudio_takes_base64_a_link_or_a_local_path_and_auto_language(monkey
         return {"text": "ola mundo", "language": payload["language"] or "pt", "audio_seconds": 1.0}
 
     monkeypatch.setattr(audio_tool, "_rodar", falso)
-    b64 = base64.b64encode(b"RIFFxxxx").decode()
+    WAV = b"RIFF\x24\x00\x00\x00WAVEfmt "
+    b64 = base64.b64encode(WAV).decode()
     assert asyncio.run(audio_tool.transcrever(audio_base64=b64))["text"] == "ola mundo"
     assert vistos[-1] == {"audio_base64": b64, "file_path": None, "language": "pt"}
 
@@ -143,11 +144,11 @@ def test_blindaudio_takes_base64_a_link_or_a_local_path_and_auto_language(monkey
     assert vistos[-1]["language"] is None
 
     async def baixa(url, max_bytes, client=None):
-        return b"BYTES"
+        return b"ID3\x04\x00\x00BYTES"
 
     monkeypatch.setattr(remote_fetch, "baixar", baixa)
     asyncio.run(audio_tool.transcrever(url="https://exemplo.net/voz.mp3", language="en"))
-    assert vistos[-1] == {"audio_base64": base64.b64encode(b"BYTES").decode(), "file_path": None, "language": "en"}
+    assert vistos[-1] == {"audio_base64": base64.b64encode(b"ID3\x04\x00\x00BYTES").decode(), "file_path": None, "language": "en"}
 
     asyncio.run(audio_tool.transcrever(file_path="C:/voz.wav"))  # Blind local
     assert vistos[-1]["file_path"] == "C:/voz.wav" and vistos[-1]["audio_base64"] is None
@@ -180,3 +181,111 @@ def test_the_blind_server_has_the_blindaudio_tool_of_its_own():
     from blind_mcp.servers import blind
 
     assert "blindaudio" in {t.name for t in asyncio.run(blind.mcp.list_tools())}
+
+
+AUDIOS = {
+    "wav": b"RIFF\x24\x00\x00\x00WAVEfmt ", "mp3": b"ID3\x04\x00\x00\x00\x00\x00\x00", "mp3 sem tag": b"\xff\xfb\x90\x00",
+    "m4a": b"\x00\x00\x00\x20ftypM4A ", "ogg": b"OggS\x00\x02\x00\x00", "flac": b"fLaC\x00\x00\x00\x22", "webm": b"\x1a\x45\xdf\xa3\x01\x00\x00\x00",
+}
+NAO_AUDIO = {"html": b"<!doctype html><html>", "exe": b"MZ\x90\x00\x03\x00\x00\x00", "pdf": b"%PDF-1.7\n", "zip": b"PK\x03\x04\x14\x00", "texto": b"ola mundo, isto nao e audio", "vazio": b""}
+
+
+def test_the_audio_type_is_read_from_the_first_bytes_of_the_file():
+    from blind_mcp import audio_tool
+
+    for nome, inicio in AUDIOS.items():
+        assert audio_tool.tipo_do_audio(inicio) is not None, nome
+    assert audio_tool.tipo_do_audio(AUDIOS["wav"]) == "wav" and audio_tool.tipo_do_audio(AUDIOS["flac"]) == "flac"
+    for nome, inicio in NAO_AUDIO.items():
+        assert audio_tool.tipo_do_audio(inicio) is None, nome
+
+
+def test_a_link_that_is_not_audio_is_refused_before_anything_is_decoded(monkeypatch):
+    from blind_mcp import audio_tool
+
+    chamadas = []
+
+    async def nao_pode(payload):
+        chamadas.append(payload)
+        return {}
+
+    monkeypatch.setattr(audio_tool, "_rodar", nao_pode)
+    for nome, corpo in NAO_AUDIO.items():
+        async def baixa(url, max_bytes, client=None, _c=corpo):
+            return _c  # o site pode dizer audio/mpeg no cabecalho: so o conteudo vale
+
+        monkeypatch.setattr(remote_fetch, "baixar", baixa)
+        with pytest.raises(ValueError, match="nao parece um audio"):
+            asyncio.run(audio_tool.transcrever(url="https://exemplo.net/voz.mp3"))
+        with pytest.raises(ValueError):
+            asyncio.run(audio_tool.transcrever(audio_base64=base64.b64encode(corpo or b"x").decode()))
+    assert chamadas == []  # o Whisper nunca foi chamado
+
+
+def test_transcriptions_run_one_at_a_time(monkeypatch):
+    from blind_mcp import audio_tool
+
+    ativas, maximo, feitas = [0], [0], []
+
+    async def lenta(payload):
+        ativas[0] += 1
+        maximo[0] = max(maximo[0], ativas[0])
+        await asyncio.sleep(0.05)
+        ativas[0] -= 1
+        feitas.append(payload["language"])
+        return {"text": "ok"}
+
+    monkeypatch.setattr(audio_tool, "_rodar", lenta)
+    b64 = base64.b64encode(AUDIOS["wav"]).decode()
+
+    async def varias():
+        return await asyncio.gather(*(audio_tool.transcrever(audio_base64=b64, language=l) for l in ("pt", "en", "es", "fr")))
+
+    assert len(asyncio.run(varias())) == 4
+    assert maximo[0] == 1 and sorted(feitas) == ["en", "es", "fr", "pt"]  # as quatro rodaram, uma por vez
+
+
+def test_web_read_of_a_pdf_link_passes_the_ocr_choice_to_the_reader(monkeypatch):
+    from blind_mcp.servers import docs
+
+    async def pdf(url, max_bytes, headers=None, client=None):
+        return b"%PDF-1.4", url, "application/pdf"
+
+    vistos = []
+
+    async def leitor(**kw):
+        vistos.append(kw["ocr_scanned"])
+        return {"filename": "a.pdf", "text": "texto"}
+
+    monkeypatch.setattr(remote_fetch, "buscar", pdf)
+    monkeypatch.setattr(docs, "read_document", leitor)
+    asyncio.run(docs.web_read("https://exemplo.net/a.pdf"))  # Blind local: o padrao continua usando a visao
+    asyncio.run(docs.web_read("https://exemplo.net/a.pdf", ocr_scanned=False))  # gateway remoto: fixo em False
+    assert vistos == [True, False]
+
+
+def test_a_scanned_pdf_link_tells_why_it_is_empty_and_hands_over_the_pages(monkeypatch):
+    from blind_mcp.servers import docs
+
+    async def pdf(url, max_bytes, headers=None, client=None):
+        return b"%PDF-1.4", url, "application/pdf"
+
+    async def escaneado(**kw):
+        return {"filename": "a.pdf", "text": "", "scanned": True, "total_pages": 1, "note": "PDF escaneado",
+                "page_images": [{"page": 1, "image_base64": "AAAA"}] if kw["devolver_imagens"] else None}
+
+    monkeypatch.setattr(remote_fetch, "buscar", pdf)
+    monkeypatch.setattr(docs, "read_document", escaneado)
+    r = asyncio.run(docs.web_read("https://exemplo.net/a.pdf", ocr_scanned=False, devolver_imagens=True))
+    assert r["content"] == "" and r["note"] == "PDF escaneado" and r["scanned"] is True and r["page_images"][0]["page"] == 1
+    vazio = asyncio.run(docs.web_read("https://exemplo.net/a.pdf", ocr_scanned=False))  # sem imagens pedidas: ainda diz o porque
+    assert vazio["note"] == "PDF escaneado" and "page_images" in vazio
+
+
+def test_read_document_returns_the_scanned_pages_as_images_only_when_asked():
+    from blind_mcp.servers.docs import _paginas_como_imagem
+
+    renders = [(1, "AAAA"), (2, "BBBB")]
+    assert _paginas_como_imagem(renders, False) == {} and _paginas_como_imagem([], True) == {}
+    r = _paginas_como_imagem(renders, True)
+    assert [p["page"] for p in r["page_images"]] == [1, 2] and "2 pagina" in r["note"]

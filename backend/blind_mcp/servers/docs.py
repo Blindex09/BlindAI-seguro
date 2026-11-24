@@ -163,6 +163,14 @@ async def _baixar_link(url: str) -> bytes:
 
 
 
+def _paginas_como_imagem(renders: List[tuple[int, str]], devolver: bool) -> Dict[str, Any]:
+    """As paginas escaneadas como imagem, para o Claude (o cliente) ler; vazio se ninguem pediu."""
+    if not (devolver and renders):
+        return {}
+    return {"page_images": [{"page": n, "image_base64": b64} for n, b64 in renders],
+            "note": f"PDF escaneado (so imagem): {len(renders)} pagina(s) seguem como imagem para voce ler."}
+
+
 @mcp.tool()
 async def read_document(
     file_path: Optional[str] = None,
@@ -171,10 +179,13 @@ async def read_document(
     pages: Optional[str] = None,
     ocr_scanned: bool = True,
     continuar: bool = False,
+    devolver_imagens: bool = False,
 ) -> Dict[str, Any]:
     """Extrai o texto de um PDF (por caminho, base64 ou link publico da web `url`, opcionalmente filtrando paginas ex: '1-3,5').
     Se o PDF for digitalizado como imagem (sem texto selecionavel) e ocr_scanned=True, renderiza as
     paginas e executa OCR/audiodescricao automatica via modelo de visao.
+    Com devolver_imagens=true (o gateway remoto fixa isso), um PDF escaneado volta com as paginas como imagem em
+    `page_images` para o proprio Claude ler, sem chamar outro modelo.
     O Blind guarda ate onde voce leu cada arquivo (`ultima_pagina_lida`). Com continuar=true le as proximas 3 paginas depois
     dessa posicao ("continua de onde parou"). Veja document_outline para pular por titulo."""
     if url and not file_base64:
@@ -225,6 +236,7 @@ async def read_document(
             "text": "",
             "scanned": bool(scanned_renders),
             "note": "O arquivo nao tem texto digital legivel; pode ser imagem digitalizada.",
+            **_paginas_como_imagem(scanned_renders, devolver_imagens),
         }
 
     shown = text[:MAX_TEXT_CHARS]
@@ -708,9 +720,10 @@ async def web_search(query: str, max_results: int = 5) -> Dict[str, Any]:
 
 
 @mcp.tool()
-async def web_read(url: str, max_chars: int = 15000) -> Dict[str, Any]:
+async def web_read(url: str, max_chars: int = 15000, ocr_scanned: bool = True, devolver_imagens: bool = False) -> Dict[str, Any]:
     """Abre uma pagina web e extrai apenas o texto principal e os titulos, sem banners, menus ou anuncios,
-    ideal para leitura direta por pessoas cegas."""
+    ideal para leitura direta por pessoas cegas. Em link de PDF escaneado, ocr_scanned=True usa a visao (chave de IA);
+    o gateway remoto fixa False e, com devolver_imagens=true (tambem fixo la), devolve as paginas como imagem para o Claude ler."""
     from .. import remote_fetch
 
     cap = max(500, min(int(max_chars or 15000), MAX_TEXT_CHARS))
@@ -722,8 +735,14 @@ async def web_read(url: str, max_chars: int = 15000) -> Dict[str, Any]:
     corpo, safe_url, ctype = await remote_fetch.buscar(url, URL_MAX_BYTES, headers=headers)
     if "application/pdf" in ctype:
         b64_pdf = base64.b64encode(corpo).decode("ascii")
-        doc_res = await read_document(file_base64=b64_pdf, ocr_scanned=True)
-        return {"ok": True, "url": safe_url, "title": doc_res.get("filename", "PDF"), "content": doc_res.get("text", "")}
+        doc_res = await read_document(file_base64=b64_pdf, ocr_scanned=bool(ocr_scanned), devolver_imagens=bool(devolver_imagens))
+        out = {"ok": True, "url": safe_url, "title": doc_res.get("filename", "PDF"), "content": doc_res.get("text", "")}
+        if not out["content"]:  # PDF sem texto: diz o porque em vez de devolver silencio
+            out["note"] = doc_res.get("note", "O PDF nao tem texto.")
+            for chave in ("scanned", "page_images", "total_pages"):
+                if chave in doc_res:
+                    out[chave] = doc_res[chave]
+        return out
     m = re.search(r"charset=([\w-]+)", ctype)
     try:
         raw_html = corpo.decode(m.group(1) if m else "utf-8", errors="replace")

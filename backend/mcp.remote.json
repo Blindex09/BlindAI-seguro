@@ -29,19 +29,6 @@
       },
       "lazy": true
     },
-    "blind-memory": {
-      "description": "Memoria pessoal persistente, busca no historico de conversas e cofre de segredos.",
-      "command": "${PYTHON}",
-      "args": [
-        "-m",
-        "blind_mcp.servers.memory"
-      ],
-      "cwd": "${BACKEND_DIR}",
-      "env": {
-        "PYTHONUTF8": "1",
-        "BLIND_DATA_DIR": "${DATA_DIR}"
-      }
-    },
     "blind-schedule": {
       "description": "Agendamento do Blind: tarefas e lembretes falados (blindschedule_create, blindschedule_list, blindschedule_snooze, blindschedule_delete).",
       "command": "${PYTHON}",
